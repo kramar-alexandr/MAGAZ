@@ -1,0 +1,364 @@
+event startup
+begin
+  SetLangMode(LangRussian,"RUS",0);
+  
+  Register("ARVc","ARVc",ARVc,modDBMain);
+  
+  Setting("Перепечатать чек",ReprintingFiscalReceiptTClass,modPOS);
+  Setting("Печать на фискальном принтере",FiscalPrintingTClass,modPOS);
+  Setting("Локальные настройки фискального принтера",FiscalSetLocalTClass,modPOS);
+  Setting("Локальная машина - ящик",LocMachDrawerTCLass,modPOS);
+  Setting("Резквизиты операционного дня",DaySessionlTClass,modPOS);
+  //Setting("Локальная машина - ящик_vc",LocMachDrawerLClass,modPOS);
+  
+  Setting("Предоплаты AP",APLClass,modDBMain);
+  Setting("Предоплаты AR",ARLClass,modDBMain);
+  Setting("Открытые предоплаты AR",ARPayLClass,modDBMain); 
+  
+  Report("HAL Primitives",HalSpecRClass,HalSpecRn,0,modSY);
+  Report("Отчет по кассе по дням",IVCashSummaryRClass,IVCashSummaryRn,0,modPOS);
+  Report("Отчет по наценкам",MarkUpRClass,MarkUpRn,0,modSL);
+  
+  Import("Импортировать товары",INImportFromFMFormatIClass,INImportFromFMFormatIn,modIN);
+  Import("Импорт остатков",ImportStockRemains2IClass,ImportStockRemains2In,modIN);
+  
+  Register("Платежи пост.","Платежи пост.",OPVc,modPL);
+  
+  Maintenance("Удалить все записи",CustomRegisterRemoveVClass,CustomRegisterRemoveMn,modDBMain);
+  Maintenance("Удалить все записи по POS",POSRegistersRemoveVClass,POSRegistersRemoveMn,modDBMain);
+  Maintenance("Удалить записи выборочно",RegistersRemoveOptionallyVClass,RegistersRemoveOptionallyMn,modDBMain);
+  Maintenance("Прописать ед.измерения в товаре, где её нет",SetUnitTextInItemIfNeededVClass,SetUnitTextInItemIfNeededMn,modIN);
+  Maintenance("Обновить текст. поля для быстрого поиска",UpdateTextFieldsForQuickSearchVClass,UpdateTextFieldsForQuickSearchMn,modDBMain); //Edit***************************Sasha2,16:53 14.12.2016
+  Maintenance("Пересчитать наценку в Поступлениях",RecalcMarkUpsInPUVClass,RecalcMarkUpsInPUMn,modDBMain);
+  Maintenance("Насчитать зарплату за дату",MakeSalaryTransactionVClass,MakeSalaryTransactionMn,modNL); //Edit***************************Sasha2,10:18 14.03.2017
+	Maintenance("Удалить старые записи RHist",CustomRegisterRemoveVClass,RHistRemoveMn,modDBMain);
+
+  SString(50000,"Укажите цену закупки"); 
+  SString(50001,"Укажите себестоимость");
+  SString(50002,"Укажите розничную цену");
+  SString(50003,"Указанная, в настройках фискального принтера, папка недоступна");
+  SString(50004,"Фискальный чек не будет напечатан для текущей счет-фактуры");
+  SString(50005,"Розничная цена");
+  SString(50006,"Должна стоять галочка ok");
+  SString(50007,"или");
+  SString(50008,"Розн.цена");
+  SString(50009,"Сумма розн.ц.");
+  SString(50010,"Это старая незакрытая сч/ф. ПРОВЕРЬТЕ!");
+  SString(50011,"Заказ для этого клиента на сегодня уже создан");
+  SString(50012,"Введите пароль");
+  SString(50013,"Пустые даты начала операционного дня");
+  SString(50014,"Кассиров в этот день: ");
+  SString(50015,"Отметьте себя в этот операционный день");
+  SString(50016,"Зарплата сотрудникам");
+  SString(50017,"Достигнуто максимально допустимое количество аутентифицированных кассиров");
+  SString(50018,"Использовать этот пароль запрещено");
+	SString(50019,"Нельзя добавить товар с кодом ");
+	SString(50020,"Товара с указанным кодом не существует ");
+	
+	
+	
+	
+  StrSetBegin(3); /* Try to keep them in alphabetical order */
+  StrSetText(ChangingINType,"Change Item's Type");
+  StrSetText(RoyaltyRepApproveWithDiscount,"Approve Royalty Sales records with approved discount");//!!TRANSLATE
+	StrSetText(RoyaltyRepApproveAnyPercentage,"Approve Royalty Sales records with custom royalty %");//!!TRANSLATE
+	StrSetText(RoyaltyRepApprove,"Approve Royalty Sales records");//!!TRANSLATE
+	StrSetText(AllowSalesmanChangeonRebCode,"Разрешить кассиру менять скидку клиента");// Edit ************************** BPI Ukraine - KramarAlexandr - Wednesday, 22 August 2018 10:50:07
+	StrSetText(AllowSalesmanChangeonContact,"Change #Salesman# on Contact"); //!!TRANSLATE
+	StrSetText(AllowRestAccSerNrChange,"Change Bar Tab No.");//!!TRANSLATE
+	StrSetText(AllowCUSerNrChange,"Change Contact Number");//!!TRANSLATE	3
+	StrSetText(AllowCustChange,"Change Customer Details");//!!TRANSLATE
+	StrSetText(CompletingServiceOrders,"Complete Service Orders"); //!!TRANSLATE
+	StrSetText(DisallowRetClose,"Disallow Changing 'No Credit Notes' on Returned Goods"); //!!TRANSLATE
+	StrSetText(DisallowPostPRActualsfornonPRMan,"Disallow posting Project actuals if not Project Member");
+	StrSetText(EMailFromAcceptedPO,"E-mail из принятого заказа поставщику");
+	StrSetText(EMailFromOKPO,"E-mail из утвержденного заказа поставщику");
+	StrSetText(EditingCAEandCAEExpiry,"Editing CAE and CAE Expiry fields in Sales Invoices");
+	StrSetText(RoyaltyRepToIV,"Invoice from Royalty Sales records");
+	StrSetText(SVOToOffHire,"Items In from Service Order");
+	StrSetText(SVOToDispatch,"Items Out from Service Order");
+	StrSetText(AllowNegativePriceonIV,"Negative Unit Price on an SL Invoice"); //!!TRANSLATE
+	StrSetText(LeaveApplicationOK,"OKing Leave Applications");
+	StrSetText(LeaveTransferOK,"OKing Leave Transfers");
+	StrSetText(AllowPOSOfflineChanging,"Pедактирование счетов-фактур кассового терминала оффлайн");
+	StrSetText(AddItemsRsrtEvent,"Resort Event Add Item");
+	StrSetText(SVOToRet,"Returned Goods from Service Order"); //!!TRANSLATE
+	StrSetText(WSToRet,"Returned Goods from Work Sheet"); //!!TRANSLATE
+	StrSetText(SVOToSVGM,"Service Stock Transaction from Service Order");//!!TRANSLATE
+	StrSetText(ORToDownPay,"Аванс из счета клиенту");
+	StrSetText(AuthExp,"Авторизирование авансовых отчетов");
+	StrSetText(AdminClient,"Администрирующий клиент");
+	StrSetText(ExpInvalid,"Аннулировать авансовый отчет");
+	StrSetText(PPInvalid,"Аннулировать выплаты подотчетному лицу");
+	StrSetText(ActInvalid,"Аннулировать деятельности");
+	StrSetText(OPInvalid,"Аннулировать платежи");
+	StrSetText(PUInvalid,"Аннулировать поступление на склад");
+	StrSetText(CLInInvalid,"Аннулировать приходный ордер");
+	StrSetText(CLOutInvalid,"Аннулировать расходный ордер");
+	StrSetText(AT2WrofInvalid,"Аннулировать списания активов");
+	StrSetText(IVInvalid,"Аннулировать сч/ф клиентам");
+	StrSetText(InvInvalid,"Аннулировать сч/ф поставщиков и клиентам");
+	StrSetText(VIInvalid,"Аннулировать сч/ф поставщиков");
+	StrSetText(InvalidateInvoice,"Аннулировать сч/ф сенсорного экрана");
+	StrSetText(RestAccInvalid,"Аннулировать счета ресторана");
+	StrSetText(AllowIVTSLoyaltyPointsBonus,"Бонусные накопительные баллы в  сч/ф сенсорн. экр.");
+	StrSetText(ViewPlanCostOR,"Ввод плановой себестоимости в заказ");// Edit ************************** Wednesday, 30 August 2017 11:09:19
+	StrSetText(ViewNextIV,"Видеть чужие акты/накладные");// Edit ************************** Monday, 15 October 2012 10:08:49
+	StrSetText(POToRetPU,"Возврат товаров из заказов поставщикам");
+	StrSetText(PUToRetPU,"Возврат товаров из поступлений");
+	StrSetText(ORToRet,"Возврат товаров из счетов клиентам");
+	StrSetText(AllowLoginOutsideWorkHours,"Вход в систему не в рабочее время");
+	StrSetText(AllowNPTSIVLogout,"Выход из системы с сч/ф (сенсорный экран)");
+	StrSetText(LogoutUserAfterPrintingBarTab,"Выход пользователя из системы после печати счета ресторана");
+	StrSetText(AllowUsersAdding,"Добавлять пользователя");
+	StrSetText(AllowCashDiscountIP,"Добавлять скидку в платежи клиента");
+	StrSetText(AllowWriteoffIP,"Добавлять списаниея в  платежи клиента");
+	StrSetText(AllowAddingINtoRetPOSIV,"Добавлять товары в возвраты сч/ф кас. терминала");
+	StrSetText(AllowAddingINtoRet,"Добавлять товары в возвраты");
+	StrSetText(OPOrder,"Заказ платежа");
+	StrSetText(TBBUToPO,"Заказ поставщику из бюджета проекта");
+	StrSetText(POCOToPO,"Заказ поставщику из контракта поставщика");
+	StrSetText(POQTToPO,"Заказ поставщику из предложения на покупку");
+	StrSetText(IntORToPO,"Заказ постащику из внутреннего заказа");
+	StrSetText(SVOToPO,"Заказ постащику из заказа на обсл.");
+	StrSetText(WSToPO,"Заказ постащику из таблицы работ");
+	StrSetText(SMToTrans,"Запись операций из симуляций");
+	StrSetText(ChangeQTItemSpec,"Измен. наимен. товара в ком. предложении");
+	StrSetText(ChangeSHItemSpec,"Измен. наимен. товара в отгрузке");
+	StrSetText(ChangeIVItemSpec,"Измен. наимен. товара в с/ф");
+	StrSetText(ChangeORItemSpec,"Измен. наимен. товара в счете");
+	StrSetText(AllowSuppInvNoChangeOKVI,"Изменение № сч/ф поставщика на утвежденных сч/ф поставщика");
+	StrSetText(AllowWSUpdateStockChange,"Изменение в таблицах работ - Обновление склада");
+	StrSetText(AllowGuestChange,"Изменение гостей");
+	StrSetText(AllowChangePOPayments,"Разрешить изменять сумму платежей в PO");// Edit ************************** BPI Ukraine - KramarAlexandr - Tuesday, 28 August 2018 10:28:10
+	StrSetText(AllowCashierCountChange,"Изменение даты в остатках по кассе");
+	StrSetText(AllowRestAccTransDateChange,"Изменение даты счета ресторана");
+	StrSetText(AllowIVInvDateChange,"Изменение даты счета-фактуры");
+	StrSetText(AllowDealerChange,"Изменение дилеров");
+	StrSetText(AllowCustChange,"Изменение карточки клиента");
+	StrSetText(AllowResClassRTMonChanging,"Изменение классификации комнат в обзоре комнат");
+	StrSetText(AllowRoomChanging,"Изменение комнаты");
+	StrSetText(AllowChangeCreditLimit,"Изменение лимита кредита");
+	StrSetText(AllowResLocRTMonChanging,"Изменение местоположения комнат в обзоре комнат");
+	StrSetText(AllowINCostModelChange,"Изменение модели стоимости товара");
+	StrSetText(AllowChangeLoyaltyPoints,"Изменение накопительных баллов в карточках");// Edit ************************** Wednesday, 27 February 2013 10:03:54
+	StrSetText(AllowLockingChange,"Изменение настроек закрытия");
+	StrSetText(AllowPOSerNrChange,"Изменение номера заказа поставщику");
+	StrSetText(AllowQTSerNrChange,"Изменение номера коммерческого предложения");
+	StrSetText(AllowCUSerNrChange,"Изменение номера контракта");
+	StrSetText(AllowOperateAllForBlockedCustomer,"Позволять работать с закрытим клиентом для всех документов"); //Edit***************************Sasha2,11:25 08.09.2017
+	StrSetText(AllowOperateSHForBlockedCustomer,"Позволять работать с закрытим клиентом для Отгрузок"); //Edit***************************Sasha2,11:25 08.09.2017
+	StrSetText(AllowORSerNrChange,"Изменение номера счета клиенту");
+	StrSetText(AllowRestAccSerNrChange,"Изменение номера счета ресторана");
+	StrSetText(AllowIVSerNrChange,"Изменение номера счета-фактуры");
+	StrSetText(AllowPasswdChanging,"Изменение пароля");
+	StrSetText(ChangingUpdateStockFlag,"Изменение поля Обновить склад на сч/ф клиенту");
+	StrSetText(AllowSuppChange,"Изменение поставщиков");
+	StrSetText(AmendLineChangePrice,"Изменение при редактировании линии");
+	StrSetText(AllowSalesmanChange,"Изменение продавца в утвержденных сч/ф");
+	StrSetText(AllowSalesmanChangeOnPOS,"Изменение продавца на сч/ф кассового терминала");
+	StrSetText(EditingWSCostAcc,"Изменение расходного счета на таблице работ");
+	StrSetText(AllowReservationChanging,"Изменение резервирования");
+	StrSetText(ChangingCostOnInvoiceRow,"Изменение себест. на строке сч/ф");
+	StrSetText(UpdateCashEvent,"Изменение событий кассы");
+	StrSetText(AllowINWeighedAvChange,"Изменение средневзвешенной цены в карточке товара");
+	StrSetText(PositionStatusChanging,"Изменение статуса места");
+	StrSetText(ChangeReserved,"Изменение статуса Резервировать в счетах и перемещениях товара");
+	StrSetText(IssueOwnChk,"Изменение статуса собственного чека");
+	StrSetText(IssueChk,"Изменение статуса чека");
+	StrSetText(ChangePrices,"Изменение цен");
+	StrSetText(UpdateCUBirthDate,"Изменение даты дня рождения");// Edit ************************** Tuesday, 23 May 2017 10:36:34
+	StrSetText(ChangeUnitPrices,"Изменение цены товара");
+	StrSetText(MyChangeUnitPricesOR,"Изменение цены товара в счете клиенту");// Edit ************************** Tuesday, 24 September 2013 13:10:48
+	StrSetText(AllowJewelleryInterface,"Интерфейс ювелирного магазина");// Edit ************************** Friday, 22 March 2013 15:10:35
+	StrSetText(AllowUsingSubonBarTab,"Использовать кнопку 'Вычесть' на счете ресторана");
+	StrSetText(AllowUsingRoomonBarTab,"Использовать кнопку 'Комната' на счете ресторана");
+	StrSetText(AllowUsingPaymentonBarTab,"Использовать кнопку 'Платеж' на счете ресторана");
+	StrSetText(AllowUsingSplitonBarTab,"Использовать кнопку 'Разделить' на счете ресторана");
+	StrSetText(AllowUsingBookingsonBarTab,"Использовать кнопку 'Резерв.' на счете ресторана");
+	StrSetText(AllowCreateCUVc,"Разрешить создавать карточки контактов");// Edit ************************** BPI Ukraine - KramarAlexandr - 03, 19 06 2019 y. at 9:23:00 AM
+	StrSetText(AllowUsingAddonBarTab,"Использовать кнопку Добавить на счете ресторана");
+	StrSetText(RoyaltyRepToCO,"Контракт из роялти записей о продажи");
+	StrSetText(InvToCO,"Контракт из сч/ф");
+	StrSetText(XXGRToXXGR,"Копирование (Drag and Drop) определений баланса и прибылей/убытков");
+	StrSetText(RetPUToVI,"Кредитный счет из возврата товаров поставщику");
+	StrSetText(RetToIV,"Кредитный счет из возврата товаров");
+	StrSetText(DisallowWSFromSVO,"Не разрешать заказы на работу из заказа на обслуживание");
+	StrSetText(DisallowIntORClose,"Не разрешать закрытие внутренних заказов");
+	StrSetText(DisallowORClose,"Не разрешать закрытие счетов");
+	StrSetText(DisallowPRBudgetChangefornonPRMan,"Не разрешать изменение бюджета проекта всем, кроме руководителя проекта");
+	StrSetText(DisallowPRScheduleChangefornonPRMan,"Не разрешать изменение графика проекта всем, кроме руководителя проекта");
+	StrSetText(DisallowPojectChangefornonPRMan,"Не разрешать изменение проекта всем, кроме руководителя проекта");
+	StrSetText(DisallowCostVariance,"Не разрешать изменения цены в поступлениях товара");
+	StrSetText(DisallowChangeIVQtyFromOR,"Не разрешать изменять к-во на сч/ф созданном из счета");
+	StrSetText(DisallowSalesmanChange,"Не разрешать менять продавца на неутвержденных сч/ф");
+	StrSetText(NotOKORToSH,"Не разрешать отгрузку из неутвержденных счетов");
+	StrSetText(DisallowPrintCopy,"Не разрешать печать копий");
+	StrSetText(DisallowFullINDClass,"Не разрешать полное окно товара");	// Edit ************************** Thursday, 24 July 2014 10:15:03
+	StrSetText(NotOKPOToPU,"Не разрешать поступления из неутвержденных заказов поставщику");
+	StrSetText(DisallowPrepToNotOKPO,"Не разрешать предоплаты для неутвержденных заказов");
+	StrSetText(DisallowPrepToNotOKOR,"Не разрешать предоплаты для неутвержденных счетов");
+	StrSetText(DisallowDomSales,"Не разрешать продажи внутренним клиентам");
+	StrSetText(DisallowSaleBelowGP,"Не разрешать продажи ниже минимальной прибыли");
+	StrSetText(DisallowSalesService,"Не разрешать продажи работ");
+	StrSetText(DisallowSalesStocked,"Не разрешать продажи складируемых товаров");
+	StrSetText(DisallowSalesStructured,"Не разрешать продажи структурированных товаров");
+	StrSetText(DisallowSalesPlain,"Не разрешать продажиf свободных товаров");
+	StrSetText(DisallownonSerNrItemsOnSR,"Не разрешать товары без трекинга сер. номера на переоценку склада");
+	StrSetText(DisallowSerNrItemsOnSR,"Не разрешать товары с трекингом сер. номера на переоценку склада");
+	StrSetText(DisallowPriceLowerCost,"Не разрешать цены ниже себестоимости");
+	StrSetText(DisallowExpSales,"Не разрешать экспортные продажи");
+	StrSetText(AllowIncorrectSerial,"Некорректные серийные номера на сф/ф ЕККА");
+	StrSetText(AllowManyActiveProd,"Несколько активных производств");
+	StrSetText(AllowBackStockMov,"Обратное перемещение");
+	StrSetText(LimitToResLoc,"Ограничить пользователя по местоположению комнаты");
+	StrSetText(AllowIVTSLoyaltyPayment,"Оплата накопительными баллами сч/ф (сенсорный экран)");
+	StrSetText(ATPUToATRes,"Оприходование ОС в мат. ответственность");
+	StrSetText(ORToSH,"Отгрузка из счетов клиентам");
+	StrSetText(SentStockMovOK,"Отгрузка при перемещении товаров");
+	StrSetText(OpenTRFromSpec,"Открытие записи из меню Операция");
+	StrSetText(OpenCashDrawer,"Открытие кассы");
+	StrSetText(OpenVcFromTBIV,"Открытие регистра из записи операции по проекту");
+	StrSetText(AllowNPTSIVCancel,"Отменять с/ф, сенс. экран");
+	StrSetText(AllowRestAccRowsVoid,"Отменять строки в счетах ресторана");
+	StrSetText(AllowIVTSRowsVoid,"Отменять строки сч/ф, сенс. экран");
+	StrSetText(AllowNPTSIVRowsVoid,"Отменять строки счета кас.терм., сенс. экран");
+	StrSetText(ShowSerialNronPOSInvoices,"Отображать сер.№ на сч/ф кассвого терминала");
+	StrSetText(AllowPOSIVNegQty,"Отрицательное количество в сч/ф кассового терминала");
+	StrSetText(AllowNegIP,"Отрицательные значения на платеже клиента");
+	StrSetText(AllowNegOP,"Отрицательные значения на платеже поставщику");
+	StrSetText(AllowNegCLIn,"Отрицательные суммы в ПКО");
+	StrSetText(AllowNegCLOut,"Отрицательные суммы в РКО");
+	StrSetText(AllowTransfertoSL,"Перемещение сч/ф кас. терм. в книгу продаж");
+	StrSetText(AllowTransfertoInvoice,"Перемещение сч/ф кас. терм. в сч/ф");
+	StrSetText(AllowTransfertoOrder,"Перемещение сч/ф кас. терм. в счет клиенту");
+	StrSetText(AllowRestAccTransfertoSL,"Перемещение счета ресторана в книгу продаж");
+	StrSetText(IntORToStockMov,"Перемещение товаров из внутреннего заказа");
+	StrSetText(PRToStockMov,"Перемещение товаров из производства");
+	StrSetText(ORToStockMov,"Перемещение товаров из счетов");
+	StrSetText(AllowMovingFoliotoRsrv,"Перемещение товаров на другое резервир.");
+	StrSetText(AllowNPTSReprint,"Перепечатать строки сч/ф (сенсорный экран)");
+	StrSetText(PrintToFiscPrnt,"Печать на фискальном принтере");
+	StrSetText(AuthQualCon,"Подписать проверку качества");
+	StrSetText(StockMovOK,"Получение перемещения товара");
+	StrSetText(ViewCostPrice,"Посмотреть стоимость затрат");
+	StrSetText(ViewCustomerInfo,"Посмотреть клиент инфо");
+	StrSetText(POToPU,"Поступление из заказа поставщику");
+	StrSetText(BUQTToIV,"Предложение бюджета в сч/ф");
+	StrSetText(BUQTToTBBU,"Предложение по проекту в бюджет");
+	StrSetText(IPToPrepIV,"Предоплата клиента в сч/ф");
+	StrSetText(AllowSplitItem,"Разделить товар на сч/ф сенсорн. экрана");
+	StrSetText(AllowAmendLine,"Разрешить изменение строки на сч/ф (сенсорный экран)");
+	StrSetText(UpdatePOSEvent,"Разрешить обновлять сессии POS");
+	StrSetText(AllowNoClockInOut,"Разрешить работу без активностей включения/выключения счет. врем.");
+	StrSetText(AllowEditPOSRowIV,"Редактирование строки товара сенс. экран. кроме кол-ва");// Edit ************************** Friday, 14 June 2013 10:10:33
+	StrSetText(ChangeMarketingVc,"Редактировать фиксацию визитов");// Edit ************************** Friday, 30 June 2017 11:21:24
+	StrSetText(JobCheckOut,"Резервирование - Выезд");
+	StrSetText(JobAddItem,"Резервирование - Добавить товар");
+	StrSetText(JobCheckIn,"Резервирование - Заезд");
+	StrSetText(JobChargeStay,"Резервирование - Оплатить пребывание");
+	StrSetText(JobShowAccount,"Резервирование - Показать состояние счета");
+	StrSetText(JobShowGuestAccount,"Резервирование - Показать счет гостя");
+	StrSetText(JobGenPrepayment,"Резервирование - Сгенерировать предоплату");
+	StrSetText(UnOKBud,"Снимать OK с бюджетов");
+	StrSetText(UnOKPO,"Снимать OK с заказов поставщикам");
+	StrSetText(UnOKRevBud,"Снимать OK с прогнозов");
+	StrSetText(UnOKAll,"Снимать OK со всех записей");
+	StrSetText(UnOKCashCount,"Снимать OK со снятия кассы");
+	StrSetText(UnOKOR,"Снимать OK со счетов");
+	StrSetText(UnOKUpdStockDocuments,"Снимать OK с док-в изменяющих склад");	//Edit----------------------Dima  24.12.2015
+	StrSetText(UnOKCashIn,"Снимать галочку OK в ПКО"); //Edit***************************Sasha2,14:01 14.01.2016
+	StrSetText(UnOKCashOut,"Снимать галочку OK в РКО"); //Edit***************************Sasha2,14:01 14.01.2016
+	StrSetText(AllowDispute,"Согласовывать сч/ф");
+	StrSetText(AllowCreateGuest,"Создавать гостей");
+	StrSetText(AllowCreateDealer,"Создавать дилеров");
+	StrSetText(AllowNewCustomerfromNPTS,"Создавать клиентов из сч/ф кассового терминала с сенс. экраном");
+	StrSetText(AllowCreateCust,"Создавать клиентов");
+	StrSetText(AllowCreateSupp,"Создавать поставщиков");
+	StrSetText(SaveSMOtherDate,"Сохранять перемещение другим числом");// Edit ************************** Friday, 8 February 2013 15:16:55
+	StrSetText(IntORToSD,"Списание со склада из внутреннего заказа");
+	StrSetText(IVToEDIInv,"Сч/ф EDI из сч/ф");
+	StrSetText(QTToIV,"Сч/ф из коммерческого предложения");
+	StrSetText(COToInv,"Сч/ф из контракта");
+	StrSetText(SVOToInv,"Сч/ф из обслуживания и ремонта");
+	StrSetText(JobToInv,"Сч/ф из резервирования");
+	StrSetText(ORToInv,"Сч/ф из счета клиенту");
+	StrSetText(POToVI,"Сч/ф поставщика из заказа поставщику");
+	StrSetText(POCOToVI,"Сч/ф поставщика из паспорта сделки");
+	StrSetText(PUToVI,"Сч/ф поставщика из поступления");
+	StrSetText(VEIVToVI,"Сч/ф поставщика из электронного сч/ф поставщика");
+	StrSetText(EDIORToOR,"Счет из EDI счетов");
+	StrSetText(QTToOrd,"Счет из предложения");
+	StrSetText(ORToPO,"Счет поставщика из счета клиенту");
+	StrSetText(RestaurantCustomerOnly,"Только клиент ресторана");
+	StrSetText(AllowReportWithUserLoc,"Учитывать склады пользователя");	// Edit ************************** Thursday, 11 July 2013 18:03:33
+	StrSetText(POToDropSH,"Уведомл. об отгр. из заказа поставщику");
+	StrSetText(DeleteSharedRecord,"Удаление записей из разделенных регистров");
+	StrSetText(DeleteAnyRecord,"Удаление записей");
+	StrSetText(AllowDeleteMarketingRecord,"Удаление записи фиксации визита");// Edit by Victor 23.07 10:40
+	StrSetText(AllowRestAccRowsDelete,"Удаление товаров из счета ресторана");
+	StrSetText(AllowIVTSRowsDelete,"Удаление товаров из счета, сенс. экран");
+	StrSetText(ExpenseOK,"Утверждение авансового отчета");
+	StrSetText(BudOK,"Утверждение бюджета");
+	StrSetText(RetPUOK,"Утверждение возврата поставщику");
+	StrSetText(RetOK,"Утверждение возврата");
+	StrSetText(AT2WrofOK,"Утверждение выбытия ОС");
+	StrSetText(HRMJPOK,"Утверждение должностей");
+	StrSetText(POOK,"Утверждение заказов поставщикам");
+	StrSetText(CredVIOK,"Утверждение кредитных сч/ф поставщика");
+	StrSetText(CredInvOK,"Утверждение кредитных сч/ф");
+	StrSetText(SHOK,"Утверждение отгрузок");
+	StrSetText(HRMSEOK,"Утверждение оценки знаний");
+	StrSetText(SROK,"Утверждение переоценки склада");
+	StrSetText(OKCashIn,"Утверждение ПКО");
+	StrSetText(POPlanOK,"Утверждение плана закупок");
+	StrSetText(ProdPlanOK,"Утверждение плана произзводства");
+	StrSetText(IPOK,"Утверждение платежей клиентов");
+	StrSetText(OPOK,"Утверждение платежей поставщикам");
+	StrSetText(PUOK,"Утверждение поступлений на склад");
+	StrSetText(HRMCOChangeOK,"Утверждение приложений к трудовым договорам");
+	StrSetText(SalesForecastOK,"Утверждение прогнозов продаж");
+	StrSetText(RevBudOK,"Утверждение прогнозов");
+	StrSetText(OKCashOut,"Утверждение РКО");
+	StrSetText(StockPolicyOK,"Утверждение складской политики");
+	StrSetText(SDOK,"Утверждение списания со склада");
+	StrSetText(InvOK,"Утверждение сч/ф клиенту");
+	StrSetText(CashInvOK,"Утверждение сч/ф на наличные");
+	StrSetText(VIOK,"Утверждение сч/ф поставщика");
+	StrSetText(OROK,"Утверждение счетов");
+	StrSetText(TimeSheetOK,"Утверждение таблиц времени");
+	StrSetText(WorkSheetOK,"Утверждение таблиц времени");
+	StrSetText(HRMCOOK,"Утверждение трудовых договоров");
+	StrSetText(DropSHOK,"Утверждение уведомл. об отгр.");
+	StrSetText(ActOK,"Утвержение активностей");
+	StrSetText(JobELockingSystem,"Электронная замочная система");
+	StrSetText(RestAPI,"Rest API");
+	StrSetText(ViewMoneyInf,"Показать всю денежную информацию");
+	StrSetText(SkipInfForStockInf,"Показать цены для склада в PO и PR");
+	StrSetText(UnOkIVSpec,"Возможность разутверждать счета-фактуры");
+	StrSetText(OpenPOSHAfterPO,"Shipment Data после открытия заказа поставщику");
+	StrSetText(SimpleIPDclass,"Упрощенное окно платежей клиента для киссира куръерской доставки");
+	StrSetText(DisableSetOkIVPrevDate,"Запретить заокеивать счет-фактуры задним числом");
+	StrSetText(CredCheckIgnore,"Разрешать отключать проверку на кредитоварние");
+	StrSetText(CreateNewItemWithoutCheck,"Разрешать создание товаров без проверок");
+	StrSetText(ConfFreightCostomsFlags,"Утверждение нулевых фрахта и таможни");
+	StrSetText(ApproveCustCost,"Подтверждение затрат на таможню");
+	StrSetText(ApproveShipCost,"Подтверждение затрат на фрахт");
+	StrSetText(ApproveCost1,"Поддтверждение затрат Накладные 1");
+	StrSetText(ApproveCost2,"Поддтверждение затрат Накладные 2");
+	StrSetText(ApproveCost3,"Поддтверждение затрат Накладные 3");
+	StrSetText(ApproveCost4,"Поддтверждение затрат Накладные 4");
+	StrSetText(ApproveCost5,"Поддтверждение затрат Накладные 5");
+	StrSetText(ViewCostsInPUJRN,"Просмотр доп. затрат в отчете журнал поступлений");
+	StrSetText(ViewAddCondForItPUf,"Флаг \"Добавление кондиций\" в поступлении IDEA");
+	StrSetText(DoNonLinkedRetPU,"Создание автономного возврата товара поставщику");
+	StrSetText(EditCostInIN,"Редактировать стоимость в карточке товара");	
+	StrSetText(CanUnReserve,"Снимать резерв с документов заказов Е-Коммерс");	
+	StrSetText(FreezAllFieldsForStock,"Сканировать товар для перемещений");
+	StrSetText(StockMovOrdFlagOff,"Не подтвержденные движения запасов"); //!!ПЕРЕВОД
+	StrSetText(StockMovOrdFlag,"Конфигурация перемещений запасов");
+  EndStrSet;
+	
+	
+	return;
+end;
