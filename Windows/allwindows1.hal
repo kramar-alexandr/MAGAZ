@@ -4032,3 +4032,25 @@ begin
   end;
   EndWindow;
 end;
+
+window SerialNoScanNPTSSClass:1
+  wtag("language","RUS"), wtag("product","*"), wtag("productcode","*"), wtag("device","computer,iPad")
+begin
+  real h,h2,h3,h4,hm,l,v,v3,vm,vs,xc,xc1;
+  real fieldh,fieldh2,keypadh,keypadh2,keypadv,fntsize;
+
+  WindowBegin("Сканировать Акцизный №",SerialNoScanNPTSSClass,CGother,RcType);
+  UseView(RcVc);
+  SetWRect(80,200,600,550);
+  vs = 20; l = 170;
+  SetupColumWithKeypadWindow(fieldh,fieldh2,keypadh,keypadh2,keypadv,vs,fntsize);
+
+  EditFieldTL(h=fieldh,v=6,fieldh2-20,"Акцизный №",M4UStr,Normal,60,f1,false,SerialNrSClass);
+
+  v = keypadv;
+  POSKeyPad(v,keypadh,v + 250,keypadh2,2,"NPTSPaymentToolKeyPad",kKeyPadEnter);  
+  v = v + 255;
+  SplitButton(keypadh,v,keypadh2,v + vs,2,"CancelSerialNoScanNPTSSClass","Отменить" & F_Label("F2"),"ProceedSerialNoScanNPTSSClass","Продолжить" & F_Label("F1"),20);  
+
+  EndWindow;
+end;

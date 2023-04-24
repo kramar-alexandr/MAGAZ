@@ -8,7 +8,7 @@ external procedure ExtractObj(string,var Integer,var string);
 remote procedure  StockMovVc_CheckStockMovement(var record StockMovVc);
 remote procedure  StockMovVc_CheckInstockFildsMn(var record StockMovVc);
 remote procedure StockMovVc_PasteSentQuant(var record StockMovVc,Integer);
-
+external function string 20 ipserver();
 
 SetLangMode(LangRussian,"RUS",0); 
 
@@ -429,6 +429,40 @@ begin
   return;
 end; //Edit***************************Sasha2,14:39 03.10.2016 }
 
+
+
+
+
+function val CheckCashReply(Area reply)
+begin
+  area logarea;
+  json jsonobj;
+  val bal;
+  string 100 resultstr;
+  
+  jsonobj = ParseJSONArea(reply);
+  resultstr = JSONGet(jsonobj,"status");
+  
+  resultstr = JSONGet(jsonobj,"report/balance");
+  CheckCashReply = stringtoval(resultstr,m4val)/100;
+   
+return;
+end;
+
+function val CheckCash()
+begin
+	string 255 command,password,d;
+	area filedata,request,reply;
+	
+	addtexttoarea("{}",request);
+
+	SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/shift/xreport","application/json; charset=""utf-8""","",false,request,reply,5);
+	CheckCash = CheckCashReply(reply);
+return;
+end;
+
+
+
 global //Edit***************************Sasha2,14:39 03.10.2016 {
 procedure ShowMoneyInBoxForIVCash()
 begin
@@ -437,20 +471,13 @@ begin
   string 30 inBoxFilePath;
   area inBoxArea;
   val money;
-    
+
     BlockLoad(Fiskalblock);
     inBoxFilePath = Fiskalblock.StoragePath & "\\" & "InBox.txt";
     
     wn = CurWindow;
     if (GetWindowClass(wn)=="NPTSIVCashDClass") then begin
-      money = -1;
-      if (FileExists(inBoxFilePath)) then begin
-        AddFileToArea(inBoxFilePath,inBoxArea,false);
-        money = StringToVal(GetStringFromArea(inBoxArea,0,255),M4Val);
-        if(currentuser=="PER1")then begin
-          money = money/100;
-        end;
-      end;
+      money = CheckCash;
       PutWindowString(wn,"DisplayMoneyInBox",money); 
     end;
   return;

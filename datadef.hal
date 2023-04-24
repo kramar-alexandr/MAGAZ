@@ -22,6 +22,12 @@ begin
 		RecordField(DaySessionStartTime,M4Time,0,0); //Edit***************************Sasha2,11:11 07.03.2017
 		RecordField(DaySessionEndTime,M4Time,0,0); //Edit***************************Sasha2,11:11 07.03.2017
 		
+		RecordField(FiscalID,M4Str,255,0);// Edit ************************** BPI Ukraine - KramarAlexandr - 03, 05 01 2022 y. at 2:06:37 PM
+    RecordField(FiscalCode,M4Str,255,0);// Edit ************************** BPI Ukraine - KramarAlexandr - 03, 05 01 2022 y. at 2:06:37 PM
+    RecordField(FiscalDate,M4Str,255,0);
+    RecordField(FiscalNum,M4Str,255,0);
+    RecordField(tax_url,M4Str,255,0);
+		
 		SubsetKeyBegin2(KSerNr); //Edit***************************Sasha2,11:56 22.09.2016
 		StoreInBaseKey; //Edit***************************Sasha2,11:56 22.09.2016
 		AppendFieldToKeyName(SalesMan); //Edit***************************Sasha2,11:56 22.09.2016

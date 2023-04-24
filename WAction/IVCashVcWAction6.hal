@@ -3472,7 +3472,7 @@ begin
   string 255 tstr,t2;
   record ACPVc ACPr;
   record SerBalVc SBr;
-  
+    
   DeselectWindow(wn,true);
   mwn = MotherWindow(wn);
   if (mwn!=0) then begin
@@ -3495,6 +3495,7 @@ begin
               goto LProceedSerialNoScanNPTSSClass;
             end;
         end;
+        
         rownr = RepSpec.long1;
         MatRowGet(IVCashr,rownr,IVCashrw);
         IVCashrw.SerialNr = RepSpec.f1;

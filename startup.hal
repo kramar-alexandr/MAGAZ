@@ -33,6 +33,9 @@ begin
   Maintenance("Насчитать зарплату за дату",MakeSalaryTransactionVClass,MakeSalaryTransactionMn,modNL); //Edit***************************Sasha2,10:18 14.03.2017
 	Maintenance("Удалить старые записи RHist",CustomRegisterRemoveVClass,RHistRemoveMn,modDBMain);
 
+  SString(24178,"Акцизный №:");
+
+
   SString(50000,"Укажите цену закупки"); 
   SString(50001,"Укажите себестоимость");
   SString(50002,"Укажите розничную цену");

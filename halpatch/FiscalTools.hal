@@ -1,6 +1,100 @@
 external function val AbsoluteVal(val);
 
-procedure CreateFiscalFile(area filedata)				//Edit----------------------Dima  11.06.2015
+SetLangMode(LangRussian,"RUS",0);
+
+
+
+
+
+global function string 100 ipserver()
+begin
+  ipserver = "192.168.88.145";
+end;
+
+
+function string 255 NormalizeStrToJson (string Str)
+begin
+	integer strln,i;
+	string 255 NormStr;
+	
+
+	NormStr = "";
+	strln = len(Str);
+	for (i=0;i<strln;i=i+1)begin
+		if(mid(Str,i,1)==chr(34))then begin
+			NormStr = NormStr & chr(92) & mid(Str,i,1);
+		end else begin
+			if(mid(Str,i,1)==chr(92))then begin
+				NormStr = NormStr & chr(92) & mid(Str,i,1);
+			end else begin
+				NormStr = NormStr & mid(Str,i,1);
+			end;
+		end;
+	end;
+	
+	
+	NormalizeStrToJson = NormStr;
+	
+	return
+end;
+
+
+procedure addParamToJSONArea(string param, string value,integer type, var area req)
+begin
+string 255 resval;
+integer i;
+
+
+
+if(type==0)then begin
+  for(i=0;i<len(value);i=i+1)begin
+    if(asc(mid(value,i,1))>31)then begin
+      resval = resval & mid(value,i,1);
+    end;
+  end;
+  AddTextToArea("\"" & param & "\":" &  "\"" & resval & "\",",req);
+end else begin
+  resval = value;
+  AddTextToArea("\"" & param & "\":" &  "" & resval & ",",req);
+end;
+
+return;
+end;
+
+procedure delLastComaInArea(var area req)
+begin
+	longint alen;
+	string 1 lastsymb;
+	area tmpar;
+	
+	alen = getarealength(req);
+	lastsymb = getstringfromarea(req,alen-1,1);
+	if(lastsymb==",")then begin
+		getareafromarea(req,0,alen-1,tmpar);
+		setareazerosize(req);
+		getareafromarea(tmpar,0,getarealength(tmpar),req);
+	end;
+
+return;
+end;
+
+
+procedure LogRequests(area atext,string tag)
+begin
+  area logarea;
+  
+  addtexttoarea(chr(13) & chr(10) & "===========================    " & tag & "         " & currentdate & " " & currenttime & chr(13) & chr(10),logarea);
+  writeareatofile(logarea,"checkboxlog.log",1);
+  writeareatofile(atext,"checkboxlog.log",1);
+  setareazerosize(logarea);
+  addtexttoarea(chr(13) & chr(10),logarea);
+  addtexttoarea(chr(13) & chr(10),logarea);
+  writeareatofile(logarea,"checkboxlog.log",1);
+return;
+end;
+
+
+/*procedure CreateFiscalFile(area filedata)				//Edit----------------------Dima  11.06.2015
 begin
 	record FiscalSetLocalBlock Fiskalblock;
 	longint tick;
@@ -19,7 +113,7 @@ begin
 		  WriteAreaToFile(emptyArea,Fiskalblock.StoragePath & "\\" & "FMCommandFlag.txt",0);
 		end;
 	//end;
-end;
+end;*/
 
 
 function val GetRemainingVoucherSum(longint sernr)
@@ -65,21 +159,23 @@ end;
 
 
 global
-function boolean MakeFiscalReceipt(record IVCashVc IVCashr)	//Edit----------------------Dima  11.06.2015
+updating function boolean MakeFiscalReceipt(record IVCashVc IVCashr)	//Edit----------------------Dima  11.06.2015
 begin
 	row IVCashVc IVCashrw;
 	record INVc INr;
 	record ITVc ITr;
 	area filedata;
-	integer i,rwcnt,tempInt;
+	integer i,rwcnt,tempInt,taxgroup;
 	string 5 d,nalogGroup,curNalogGroup;
-	string 255 rowStr,name;
+	string 255 rowStr,name,message;
 	string 10 articul,saleCommand,payCommand,refundCommand,command,rebateCommand,commentCommand;
 	integer printStatus,paymentStatus,discountType;
 	longint rowSum,totalRebate,cashSum,cardSum,giftSum,quant,giftBalance,prepaymentSum,totSum;
 	array longint VoucherNumbers;
 	array longint VoucherSum;
 	boolean res;
+	json jobj;
+	area request,reply;
 	
   d = "!===!"; 	//divider
 
@@ -96,6 +192,31 @@ begin
   prepaymentSum = 0;
 	rwcnt = MatRowCnt(IVCashr);
 	res = true;
+		
+	for(i=0;i<rwcnt;i=i+1) begin
+	  MatRowGet(IVCashr,i,IVCashrw);
+    if (IVCashrw.stp==kInvoiceRowTypeCreditCardPayment and IVCashrw.PayMode=="GC" and IVCashr.Sum4<0 ) then begin //Edit----------------------Dima  08.09.2015
+      res = false;
+      goto LMakeFiscalReceipt;
+    end;	
+	end;
+	
+	
+	if(rwcnt==0)then begin
+	  res = false;
+    goto LMakeFiscalReceipt;
+	end;
+	
+	
+	setareazerosize(request);
+	addtexttoarea("{",request);
+	addParamToJSONArea("commit_transaction",NormalizeStrToJson("true"),0,request);
+	delLastComaInArea(request);
+	addtexttoarea("}",request);
+	LogRequests(request,">>>Create REceipt");
+	SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/receipt","application/json; charset=""utf-8""","",false,request,reply,5);
+	LogRequests(reply,"<<<Create REceipt");
+	
 	
 	for(i=0;i<rwcnt;i=i+1) begin
 		MatRowGet(IVCashr,i,IVCashrw);
@@ -127,6 +248,7 @@ begin
 			end else begin
 			  quant = AbsoluteVal(IVCashrw.Quant);
 			end;
+			quant = AbsoluteVal(IVCashrw.Quant)*1000;
 			
 			articul = IVCashr.SerNr & i;
 			rowStr = command & d & quant & d & printStatus  & d &  "false" & d &  rowSum & d & curNalogGroup & d &  "false" & d & IVCashrw.Spec & d & articul & d; 
@@ -137,14 +259,48 @@ begin
 				rowStr = rebateCommand & d & discountType & d & rowSum  & d &  USetStr(31067)  & d;
 				AddTextToArea(rowStr,filedata);
 			end;
-						
+			
+			//====================================================================================================>>>>>>>
+			setareazerosize(request);
+      addtexttoarea("{",request);
+      addParamToJSONArea("code",NormalizeStrToJson(IVCashrw.ArtCode),0,request);
+      addParamToJSONArea("name",NormalizeStrToJson(IVCashrw.Spec),0,request);
+      addParamToJSONArea("price",rowSum,1,request);
+      addParamToJSONArea("quantity",quant,1,request);      
+      taxgroup = 8;//Normal
+      addtexttoarea("\"taxes\": [" & taxgroup & "],",request);///Налоговая группа
+      
+      if (nonblank(IVCashrw.vRebate) and IVCashrw.Quant>0) then begin
+        addtexttoarea("\"discounts\": [{",request);
+        addtexttoarea("\"type\": \"DISCOUNT\",",request);
+        addtexttoarea("\"mode\": \"PERCENT\",",request);
+        addParamToJSONArea("value",stringtoval(IVCashrw.vRebate,m4val),1,request);
+        addtexttoarea("\"tax_codes\": [0]",request);
+        addParamToJSONArea("price",rowSum,1,request);
+        delLastComaInArea(request);
+        addtexttoarea("}]",request);
+				rowSum = (AbsoluteVal(IVCashrw.Quant)*IVCashrw.Price - (AbsoluteVal(IVCashrw.Sum)))*100;
+				rowStr = rebateCommand & d & discountType & d & rowSum  & d &  USetStr(31067)  & d;
+				AddTextToArea(rowStr,filedata);
+			end;
+      
+      if(nonblank(IVCashrw.SerialNr))then begin
+        addParamToJSONArea("barcode",IVCashrw.SerialNr,0,request);
+      end;
+      
+      if (IVCashrw.Quant>0) then begin
+				addParamToJSONArea("is_return","false",1,request);
+			end else begin	
+				addParamToJSONArea("is_return","true",1,request);
+			end;
+      
+      delLastComaInArea(request);
+      addtexttoarea("}",request);
+      LogRequests(request,">>>Add Good");
+      SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/receipt/good","application/json; charset=""utf-8""","",false,request,reply,5);
+      LogRequests(reply,"<<<Add Good");
+			//====================================================================================================>>>>>>>			
 		end;
-		
-		if (IVCashrw.stp==kInvoiceRowTypeCreditCardPayment and IVCashrw.PayMode=="GC" and IVCashr.Sum4<0 ) then begin //Edit----------------------Dima  08.09.2015
-				res = false;
-				goto LMakeFiscalReceipt;
-		end;	
-		
 		
 		if (IVCashrw.stp == kInvoiceRowTypeGiftVoucherSold) then begin
 			rowSum = IVCashrw.Sum * 100;
@@ -231,10 +387,60 @@ begin
 				rowStr = payCommand & d & paymentStatus & d & "0" & d &  "false" & d & "true" & d ;
 				AddTextToArea(rowStr,filedata);
 	end;	
-	
+
 
 	AddTextToArea(chr(13) & "<END>",filedata);
-	CreateFiscalFile(filedata);
+	
+	
+	//====================================================================================================>>>>>>>
+	setareazerosize(request);
+	addtexttoarea("{",request);
+	
+	addtexttoarea("\"payments\": [",request);
+	  
+  cashSum = totSum - cardSum;
+  
+  if(cardSum>0)then begin
+    addtexttoarea("{",request);
+      addParamToJSONArea("type",NormalizeStrToJson("CASHLESS"),0,request);
+      addParamToJSONArea("code",2,1,request);
+      addParamToJSONArea("value",cardSum,1,request);
+      addParamToJSONArea("label",NormalizeStrToJson("Картка"),0,request);
+      delLastComaInArea(request);
+    addtexttoarea("},",request);
+  end;
+  if(cashSum>0)then begin
+    addtexttoarea("{",request);
+      addParamToJSONArea("type",NormalizeStrToJson("CASH"),0,request);
+      addParamToJSONArea("value",cashSum,1,request);
+      addParamToJSONArea("label",NormalizeStrToJson("Готівка"),0,request);
+      delLastComaInArea(request);
+    addtexttoarea("},",request);
+	end;
+	delLastComaInArea(request);
+	addtexttoarea("]}",request);
+	LogRequests(request,">>>Close REceipt");
+	SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/receipt/done","application/json; charset=""utf-8""","",false,request,reply,5);
+	LogRequests(reply,"<<<Close REceipt");
+	
+	
+	jobj = parsejsonarea(reply);
+	if(JSONGet(jobj,"status")=="DONE")then begin
+	  messagebox(0,"Продажа фискализирована");
+    IVCashr.FiscalID = JSONGet(jobj,"id");
+    IVCashr.FiscalNum = JSONGet(jobj,"shift/cash_register/fiscal_number");
+    IVCashr.FiscalCode = JSONGet(jobj,"fiscal_code");
+    IVCashr.FiscalDate = JSONGet(jobj,"fiscal_date");
+    IVCashr.tax_url = JSONGet(jobj,"tax_url");
+  end else begin
+    message = JSONGet(jobj,"message");
+    messagebox(0,"Ошибка фискализации " & message);
+  end;
+	
+	
+	
+	//====================================================================================================>>>>>>>
+	//CreateFiscalFile(filedata);
 	
 	LMakeFiscalReceipt:;
 	MakeFiscalReceipt = res;
@@ -243,28 +449,153 @@ end;
 
 
 
+global procedure CheckCashReply(Area reply)
+begin
+  area logarea;
+  json jsonobj;
+  val bal;
+  string 100 resultstr;
+  
+  jsonobj = ParseJSONArea(reply);
+  resultstr = JSONGet(jsonobj,"status");
+  
+  if(resultstr=="true" or resultstr=="1")then begin
+    resultstr = JSONGet(jsonobj,"report/balance");
+    if(nonblank(resultstr))then begin
+     bal = stringtoval(resultstr,m4val)/100;
+     messagebox(0,"Денег в кассе: " & bal);
+    end else begin
+      messagebox(0,"Ошибка!");
+    end;
+    
+    
+  end else begin
+    messagebox(0,"Ошибка!");
+  end;
+  
+  LogRequests(reply,"<<<MakeXReport");
+  
+return;
+end;
+
+global procedure CheckCash()
+begin
+	string 255 command,password,d;
+	area filedata,request,reply;
+	
+	addtexttoarea("{}",request);
+		
+	LogRequests(request,">>>MakeXReport");
+	SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/shift/xreport","application/json; charset=""utf-8""","",false,request,reply,5);
+	CheckCashReply(reply);
+return;
+end;
+
+
+global procedure MakeXReportReply(Area reply)
+begin
+  area logarea;
+  
+  LogRequests(reply,"<<<MakeXReport");
+  
+return;
+end;
+
 global procedure MakeXReport()
 begin
 	string 255 command,password,d;
-	area filedata;
+	area filedata,request,reply;
 	
 	d = "!===!"; 	//divider	
 	command = "DayReport";
 	
 	AddTextToArea(command & d,filedata);
 	AddTextToArea(chr(13) & "<END>",filedata);
-	CreateFiscalFile(filedata);
+	
+	addtexttoarea("{}",request);
+		
+	LogRequests(request,">>>MakeXReport");
+	
+	SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/shift/xreport","application/json; charset=""utf-8""","",false,request,reply,5);
+  MakeXReportReply(reply);
+	
+	//CreateFiscalFile(filedata);
 return;
 end;
 
 
 
+global procedure OpenShiftReply(Area reply)
+begin
+  area logarea;
+  json jsonobj;
+  string 100 resultstr;
+  
+  jsonobj = ParseJSONArea(reply);
+  resultstr = JSONGet(jsonobj,"status");
+  
+  if(resultstr=="true" or resultstr=="1")then begin
+    messagebox(0,"Смена открыта");
+  end else begin
+    messagebox(0,"Ошибка!");
+  end;
+    
+  LogRequests(reply,"<<<<OpenShift");
+  
+return;
+end;
+
+global procedure OpenShift()
+begin
+	string 255 command,password,d;
+	area filedata,request,reply;
+		
+	addtexttoarea("{}",request);
+		
+	LogRequests(request,">>>OpenShift");
+	
+	SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/shift/open","application/json; charset=""utf-8""","",false,request,reply,5);
+  OpenShiftReply(reply);
+	
+	//CreateFiscalFile(filedata);
+return;
+end;
+
+
+
+global procedure MakeZReportReply(Area reply)
+begin
+  area logarea;
+  json jsonobj;
+  string 100 resultstr,message;
+  
+  jsonobj = ParseJSONArea(reply);
+  resultstr = JSONGet(jsonobj,"status");
+    
+  if(resultstr=="true" or resultstr=="1")then begin
+    messagebox(0,"Смена закрыта");
+  end else begin
+    message = "Ошибка!";
+    resultstr = JSONGet(jsonobj,"message");
+    if(nonblank(resultstr))then begin
+      message = resultstr;
+    end;
+    messagebox(0,message);
+  end;
+  
+  LogRequests(reply,"<<<MakeZReport");
+  
+return;
+end;
+
 global procedure MakeZReport()
 begin
 	string 255 command,password,d,cashOutFlag;
-	area filedata;
+	area filedata,request,replyarea,reply;
 	integer wn;
+	longint sum;
 	record RcVc RepSpec;
+	json jsonobj;
 	
 	wn = CurWindow;
 	DeselectWindow(wn,false);	
@@ -282,12 +613,39 @@ begin
 	
 	AddTextToArea(command & d & cashOutFlag & d,filedata);
 	AddTextToArea(chr(13) & "<END>",filedata);
-	CreateFiscalFile(filedata);
+	
+	
+	if(cashOutFlag=="true")then begin
+	  addtexttoarea("{}",request);
+	  LogRequests(request,">>>XReport");
+	  SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/shift/xreport","application/json; charset=""utf-8""","",false,request,replyarea,5);
+    jsonobj = ParseJSONArea(replyarea);
+    LogRequests(replyarea,"<<<XReport");
+    sum = stringtolongint(JSONGet(jsonobj,"report/balance"));
+    
+    if(sum>0)then begin
+      setareazerosize(request);
+      addtexttoarea("{\"payment\": {\"type\": \"CASH\",\"value\": " & -sum & ",\"label\": \"Готівка\"}}",request);
+      LogRequests(request,">>>CashOut");
+      SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/receipt/service","application/json; charset=""utf-8""","",false,request,replyarea,5);
+      LogRequests(replyarea,"<<<CashOut");
+    end;
+    
+	  setareazerosize(request);
+	end;
+	
+	addtexttoarea("{}",request);
+	LogRequests(request,">>>MakeZReport");
+	
+	SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/shift/close","application/json; charset=""utf-8""","",false,request,reply,5);
+	MakeZReportReply(reply);
+	
+	//CreateFiscalFile(filedata);
 return;
 end;
 
 
-global procedure MakePeriodicReport()
+/*global procedure MakePeriodicReport()
 begin
 	string 255 command,password,d;
 	area filedata;
@@ -307,16 +665,16 @@ begin
 
 	AddTextToArea(command & d & sdate & d & edate,filedata);
 	AddTextToArea(chr(13) & "<END>",filedata);
-	CreateFiscalFile(filedata);
+	//CreateFiscalFile(filedata);
 	
 
 return;
-end;
+end;*/
 
 
 
 
-global procedure MakePeriodicShortReport()
+/*global procedure MakePeriodicShortReport()
 begin
 	string 255 command,d;
 	area filedata;
@@ -336,42 +694,76 @@ begin
 
 	AddTextToArea(command & d & sdate & d & edate,filedata);
 	AddTextToArea(chr(13) & "<END>",filedata);
-	CreateFiscalFile(filedata);	
+	//CreateFiscalFile(filedata);	
 
 return;
-end;
+end;*/
 
+
+global procedure ResetOrderReply(Area reply)
+begin
+  area logarea;
+  
+  LogRequests(reply,"ResetOrder");
+  
+return;
+end;
 
 global procedure MakeResetOrder()
 begin
 	string 255 command,d;
-	area filedata;
+	area filedata,request,reply;
 	
 	d = "!===!"; 	//divider	
 	command = "ResetOrder";
 	
 	AddTextToArea(command & d,filedata);
 	AddTextToArea(chr(13) & "<END>",filedata);
-	CreateFiscalFile(filedata);
+	
+	addtexttoarea("{}",request);
+		
+	LogRequests(request,"ResetOrder");
+	
+	SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/receipt","application/json; charset=""utf-8""","",false,request,reply,5);
+  ResetOrderReply(reply);
+	
+	//CreateFiscalFile(filedata);
 return;
 end;
 
 
+global procedure MakeNullCheckReply(Area reply)
+begin
+  area logarea;
+  
+  LogRequests(reply,"NullCheck");
+  
+return;
+end;
+
 global procedure MakeNullCheck()
 begin
 	string 255 command,d;
-	area filedata;
+	area filedata,request,reply;
 	
 	d = "!===!"; 	//divider	
 	command = "NullCheck";
 	
 	AddTextToArea(command & d,filedata);
 	AddTextToArea(chr(13) & "<END>",filedata);
-	CreateFiscalFile(filedata);
+	
+	addtexttoarea("{}",request);
+		
+	LogRequests(request,"NullCheck");
+	
+	SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/receipt/null","application/json; charset=""utf-8""","",false,request,reply,5);
+  MakeNullCheckReply(reply);
+	
+	//CreateFiscalFile(filedata);
 return;
 end;
 
-global procedure MakeLastCheck()
+/*global procedure MakeLastCheck()
 begin
 	string 255 command,d;
 	area filedata;	
@@ -381,20 +773,62 @@ begin
 	
 	AddTextToArea(command & d,filedata);
 	AddTextToArea(chr(13) & "<END>",filedata);
-	CreateFiscalFile(filedata);	
+	//CreateFiscalFile(filedata);	
 	
 return;
-end;
+end;*/
 
+
+global procedure MakeCashOutReply(Area reply)
+begin
+  area logarea;
+  json jsonobj;
+  string 100 resultstr,message;
+  boolean res;
+  
+  jsonobj = ParseJSONArea(reply);
+  resultstr = JSONGet(jsonobj,"type");
+  if(resultstr=="SERVICE_IN")then begin
+    resultstr = JSONGet(jsonobj,"status");
+    if(resultstr=="DONE")then begin
+      res = true;
+      Messagebox(0,"Внесение денег готово.");
+    end;
+  end;
+  if(resultstr=="SERVICE_OUT")then begin
+    resultstr = JSONGet(jsonobj,"status");
+    if(resultstr=="DONE")then begin
+      res = true;
+      Messagebox(0,"Вынесение денег готово.");
+    end;
+  end;
+  
+  
+  
+  if(!res)then begin
+    message = "Ошибка!";
+    resultstr = stringtolongint(JSONGet(jsonobj,"message"));
+    if(nonblank(resultstr))then begin
+      message = resultstr;
+    end;
+    messagebox(0,message);
+  end;
+  
+  LogRequests(reply,"CashIn or CashOut");
+  
+return;
+end;
 
 
 global procedure MakeCashIn()
 begin
 	string 255 command,avans,d;
-	area filedata;
+	area filedata,request,reply;
 	integer wn;
 	longint sum;
 	record RcVc RepSpec;
+	
+	logtext(0,"MakeCashIn");
 	
 	wn = CurWindow;
 	DeselectWindow(wn,false);	
@@ -404,21 +838,35 @@ begin
 	command = "InToCash";
 	sum = RepSpec.vals1 * 100;
 	avans = sum;
+	RepSpec.vals1 = blankval;
+	PutWindowRecord(wn,RepSpec);	
+	
+	addtexttoarea("{\"payment\": {\"type\": \"CASH\",\"value\": " & sum & ",\"label\": \"Готівка\"}}",request);
+		
+	LogRequests(request,"CashIn");
+	if(sum>0)then begin
+    SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/receipt/service","application/json; charset=""utf-8""","",false,request,reply,5);
+    MakeCashOutReply(reply);
+  end;
 	
 	AddTextToArea(command & d & avans & d,filedata);
 	AddTextToArea(chr(13) & "<END>",filedata);
-	CreateFiscalFile(filedata);
+	//CreateFiscalFile(filedata);
 return;
 end;
+
 
 
 global procedure MakeCashOut()
 begin
 	string 255 command,money,d;
-	area filedata;
+	area filedata,reply;
 	integer wn;
 	record RcVc RepSpec;
 	longint sum;
+	area request;
+	
+	logtext(0,"MakeCashOut");
 	
 	wn = CurWindow;
 	DeselectWindow(wn,false);	
@@ -427,16 +875,30 @@ begin
 	d = "!===!"; 	//divider	
 	command = "OutOfCash";
 	sum = RepSpec.vals1 * 100;
+	RepSpec.vals1 = blankval;
+	PutWindowRecord(wn,RepSpec);	
+	
+	
 	money = sum;
 	
 	AddTextToArea(command & d & money & d,filedata);
 	AddTextToArea(chr(13) & "<END>",filedata);
-	CreateFiscalFile(filedata);
+	
+	addtexttoarea("{\"payment\": {\"type\": \"CASH\",\"value\": " & -sum & ",\"label\": \"Готівка\"}}",request);
+		
+	LogRequests(request,"CashOut");
+	if(sum>0)then begin
+    SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/receipt/service","application/json; charset=""utf-8""","",false,request,reply,5);
+
+    MakeCashOutReply(reply);
+	end;
+	//CreateFiscalFile(filedata);
+	
 return;
 end;
 
 
-global procedure MakeDateSetting()
+/*global procedure MakeDateSetting()
 begin
 	string 255 command,d;
 	string 10 newdate,newtime;
@@ -464,9 +926,9 @@ begin
 	
 	AddTextToArea(command & d & newdate & d & newtime & d,filedata);
 	AddTextToArea(chr(13) & "<END>",filedata);
-	CreateFiscalFile(filedata);
+	//CreateFiscalFile(filedata);
 return;
-end;
+end;*/
 
 
 
@@ -493,7 +955,7 @@ end;
 
 
 
-global procedure OpenCashBox()	//Edit----------------------Dima  07.07.2015
+/*global procedure OpenCashBox()	//Edit----------------------Dima  07.07.2015
 begin
 	string 255 command,d;
 	area filedata;	
@@ -503,10 +965,10 @@ begin
 	
 	AddTextToArea(command & d,filedata);
 	AddTextToArea(chr(13) & "<END>",filedata);
-	CreateFiscalFile(filedata);	
+	//CreateFiscalFile(filedata);	
 	
 return;
-end;
+end;*/
 
 
 

@@ -180,27 +180,25 @@ begin
 	record IVCashVc IVCashr;
 	boolean res;
 	
-	wn = CurWindow;
-	if (GetWindowFileName(wn)=="IVCashVc") then begin
-  	DeselectWindow(wn,false);	
-  	GetWindowRecord(wn,RepSpec);
-  	
-  	IVCashr.SerNr = RepSpec.long1;
-  	if (ReadFirstMain(IVCashr,1,true)) then begin
-  		res = MakeFiscalReceipt(IVCashr);
-  		if (res==false) then begin
-  			MessageBox(50004,"");		//Edit----------------------Dima  08.09.2015
-  		end;			
-  		if (res) then begin
-        if (IVCashr.FiscalFlag < 1) then begin
-          IVCashr.FiscalFlag = 1;
-        end;
-        IVCashr.PrintFlagCounter = IVCashr.PrintFlagCounter + 1;
-        RECORDSTORE(IVCashr,true);
+	wn = curwindow;
+	DeselectWindow(wn,false);	
+  GetWindowRecord(wn,RepSpec);
+  
+  IVCashr.SerNr = RepSpec.long1;
+  if (ReadFirstMain(IVCashr,1,true)) then begin
+    res = MakeFiscalReceipt(IVCashr);
+    if (res==false) then begin
+      MessageBox(50004,"");		//Edit----------------------Dima  08.09.2015
+    end;			
+    if (res) then begin
+      if (IVCashr.FiscalFlag < 1) then begin
+        IVCashr.FiscalFlag = 1;
       end;
-  	end;
-	end;
-		
+      IVCashr.PrintFlagCounter = IVCashr.PrintFlagCounter + 1;
+      RECORDSTORE(IVCashr,true);
+    end;
+  end;
+	
 end; //Edit***************************Sasha2,16:20 13.06.2016 }
 
 global //Edit***************************Sasha2,11:53 30.09.2016 {

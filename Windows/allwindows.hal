@@ -955,6 +955,15 @@ begin
       EditField(h2,v+=vs,82,"Чистые Наличные No.",ViewOnly,FiscalDeviceSeqNr,false,0); 
     end;
   end;
+  v = v+vs;
+  EditField(h1,v+=vs,280,"Fiscal №",Normal,FiscalID,false,0);// Edit ************************** BPI Ukraine - KramarAlexandr - 04, 06 01 2022 y. at 3:03:51 PM
+  EditField(h1,v+=vs,280,"Fiscal Code",Normal,FiscalCode,false,0);// Edit ************************** BPI Ukraine - KramarAlexandr - 04, 06 01 2022 y. at 3:03:32 PM
+  EditField(h1,v+=vs,280,"Fiscal Date/Time",Normal,FiscalDate,false,0);// Edit ************************** BPI Ukraine - KramarAlexandr - 04, 06 01 2022 y. at 3:03:21 PM
+  EditField(h1,v+=vs,280,"Fiscal Number",Normal,FiscalNum,false,0);
+  EditField(h1,v+=vs,280,"Fiscal Tax URL",Normal,tax_url,false,0);// Edit ************************** BPI Ukraine - KramarAlexandr - 04, 06 01 2022 y. at 3:26:43 PM
+
+  
+  
   vs = 22;
   Tile(4,110,false,"4",Location);
   vs = 20; h1 = 95; h2 = 256; h3 = 456;

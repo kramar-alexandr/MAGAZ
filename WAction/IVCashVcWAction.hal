@@ -84,6 +84,8 @@ external procedure POSAudit_WindowClose(Integer);
 external procedure POSAudit_KeyEnter(Integer,string,string);
 external procedure POSAudit_LogIVCashVcRow(record IVCashVc,row IVCashVc,Integer);
 
+SetLangMode(LangRussian,"RUS",0);
+
 //Edit***************************Sasha2,14:56 14.09.2016
 /*function boolean UpdateExistingVarietyRowsf()
 begin
@@ -426,6 +428,13 @@ begin
         PutWindowString(wn,"touchscreenitemlastrownr",rownr);
         PutWindowString(wn,"ivcashcommandlastitemsernrf","");
         POSAudit_LogIVCashVcRow(IVCashr,IVCashrw,kPOSEventTypeAddRow);
+        INr.Code = IVCashrw.ArtCode;
+        if(readfirstmain(INr,1,true))then begin
+          if(INr.Group=="€‹ŠŽƒ")then begin
+            RepSpec.long1 = rownr;
+            nwn = OpenWindow("SerialNoScanNPTSSClass",0,wn,"","",RepSpec);
+          end;
+        end;
         if (FindStringInString(IVCashrw.ArtCode,".") or varf==false) then begin     
           if (sernrf==1) or (sernrf==2)  then begin
             PutWindowString(wn,"ivcashcommandlastitemsernrf","true");
