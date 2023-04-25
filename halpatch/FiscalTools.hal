@@ -177,6 +177,8 @@ begin
 	json jobj;
 	area request,reply;
 	
+	goto lMakeFiscalReceipt:;
+	
   d = "!===!"; 	//divider
 
   saleCommand = "SaleEx";
