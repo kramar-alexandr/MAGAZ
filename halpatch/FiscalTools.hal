@@ -1,7 +1,10 @@
 external function val AbsoluteVal(val);
-external function roundmode SetRoundModeD(Integer);
 
 SetLangMode(LangRussian,"RUS",0);
+
+
+
+
 
 global function string 100 ipserver()
 begin
@@ -233,9 +236,7 @@ begin
 		      end;
 		    end;
 		  end;
-		  
-		  IVCashrw.Price = round(IVCashrw.Price,SetRoundModeD(1));
-		  IVCashrw.Sum = round(IVCashrw.Sum,SetRoundModeD(1));
+		  	
 			if (IVCashrw.Quant>0) then begin
 				command = saleCommand;
 				rowSum = IVCashrw.Price * 100;

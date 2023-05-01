@@ -94,6 +94,7 @@ external updating procedure IVCash_To_IV(longint);// Edit **********************
 external updating procedure IVCash_To_IVUnOk(longint);// Edit ************************** Wednesday, 30 November 2016 10:55:44
 external procedure GetSalesGroup(string,var string);// Edit ************************** BPI Ukraine - KramarAlexandr - 02, 27 08 2019 y. at 11:46:31 AM
 external procedure ExtractObj(string,var Integer,var string);// Edit ************************** BPI Ukraine - KramarAlexandr - 02, 27 08 2019 y. at 11:47:24 AM
+external function roundmode SetRoundModeD(Integer);
 
 // This function is actually not used, but prepared to be and is used by customisation
 
@@ -716,6 +717,17 @@ BEGIN
   res = 0;
   insertmode = 1;//Rs_insert
   updatemode = 2;//Rs_update
+  
+  rwcnt = MatRowCnt(IVCashr);
+  for (i=0;i<rwcnt;i=i+1) begin
+    MatRowGet(IVCashr,i,IVCashrw);
+      IVCashrw.Quant = round(IVCashrw.Quant,SetRoundModeD(1));
+      IVCashrw.Price = round(IVCashrw.Price,SetRoundModeD(1));
+      IVCashrw.Sum = round(IVCashrw.Sum,SetRoundModeD(1));
+    MatRowPut(IVCashr,i,IVCashrw);
+    IVCashSumup(IVCashr,true);
+  end;
+  
   
   if (stat==insertmode) then begin //Edit***************************Sasha2,14:05 18.08.2016 {
     Locr.Code = IVCashr.Location;
