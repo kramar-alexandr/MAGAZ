@@ -8,7 +8,7 @@ SetLangMode(LangRussian,"RUS",0);
 
 global function string 100 ipserver()
 begin
-  ipserver = "192.168.88.145";
+  ipserver = "127.0.0.1";
 end;
 
 
