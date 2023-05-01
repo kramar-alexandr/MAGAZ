@@ -851,7 +851,8 @@ begin
 
   MatRowGet(IVCashr,rownr,IVCashrw);
   BlockLoad(GenOptRec);
-  price = IVCashrw.Price;
+  price = round(IVCashrw.Price,SetRoundModeD(1));
+  IVCashrw.Quant = round(IVCashrw.Quant,SetRoundModeD(1));
   vreb = StringToVal(IVCashrw.vRebate,M41Val); //should be version with string ? 
   if (GetItemPriceDiscount3(IVCashrw.ArtCode,IVCashrw.Quant,INr,IVCashr.CurncyCode,
                             IVCashr.FrRate,IVCashr.ToRateB1,IVCashr.ToRateB2,IVCashr.BaseRate1,IVCashr.BaseRate2,
