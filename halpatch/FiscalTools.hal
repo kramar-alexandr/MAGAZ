@@ -177,7 +177,9 @@ begin
 	json jobj;
 	area request,reply;
 	
-	goto lMakeFiscalReceipt;
+	if(currentuser!="PER1")then begin
+    goto lMakeFiscalReceipt;
+	end;
 	
   d = "!===!"; 	//divider
 
