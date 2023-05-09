@@ -178,7 +178,7 @@ begin
 	area request,reply;
 	
 	if(currentuser!="PER1")then begin
-    goto lMakeFiscalReceipt;
+   // goto lMakeFiscalReceipt;
 	end;
 	
   d = "!===!"; 	//divider
