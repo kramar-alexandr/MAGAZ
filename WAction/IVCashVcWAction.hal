@@ -433,6 +433,9 @@ begin
           if(INr.Group=="€‹ŠŽƒ")then begin
             RepSpec.long1 = rownr;
             nwn = OpenWindow("SerialNoScanNPTSSClass",0,wn,"","",RepSpec);
+            selectwindow(nwn);
+            WindowFieldGoto(nwn,RepSpec,-1,"f1",true);
+            goto LIVCashDClasstouchscreenitemEFAfter;
           end;
         end;
         if (FindStringInString(IVCashrw.ArtCode,".") or varf==false) then begin     

@@ -582,7 +582,7 @@ begin
     message = "øèáêà!";
     resultstr = JSONGet(jsonobj,"message");
     if(nonblank(resultstr))then begin
-      message = resultstr;
+      message = message & " " & resultstr;
     end;
     messagebox(0,message);
   end;
@@ -813,7 +813,7 @@ begin
     message = "øèáêà!";
     resultstr = stringtolongint(JSONGet(jsonobj,"message"));
     if(nonblank(resultstr))then begin
-      message = resultstr;
+      message = message & " " & resultstr;
     end;
     messagebox(0,message);
   end;
