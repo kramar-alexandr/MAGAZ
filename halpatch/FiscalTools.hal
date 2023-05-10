@@ -9,6 +9,7 @@ SetLangMode(LangRussian,"RUS",0);
 global function string 100 ipserver()
 begin
   ipserver = "127.0.0.1";
+  //ipserver = "192.168.88.145";
 end;
 
 
@@ -385,7 +386,7 @@ begin
 				
 	end;
 	
-	totSum = IVCashr.Sum4*100;
+	totSum = AbsoluteVal(IVCashr.Sum4*100);
 	if (totSum>0  and  ((giftSum >= totSum) or (prepaymentSum >= totSum))) then begin	//for closing of receipt
 				paymentStatus = 3;
 				rowStr = payCommand & d & paymentStatus & d & "0" & d &  "false" & d & "true" & d ;
