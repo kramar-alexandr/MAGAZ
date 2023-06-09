@@ -438,8 +438,14 @@ begin
     IVCashr.FiscalDate = JSONGet(jobj,"fiscal_date");
     IVCashr.tax_url = JSONGet(jobj,"tax_url");
   end else begin
-    message = JSONGet(jobj,"message");
-    messagebox(0,"Ошибка фискализации " & message);
+    if(JSONGet(jobj,"status")=="NEW")then begin
+      IVCashr.FiscalID = JSONGet(jobj,"external_id");
+      IVCashr.FiscalDate = JSONGet(jobj,"created_at");
+      messagebox(0,"Продажа фискализирована");
+    end else begin
+      message = JSONGet(jobj,"message");
+      messagebox(0,"Ошибка фискализации " & message);
+    end;
   end;
 	
 	
