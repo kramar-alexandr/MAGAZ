@@ -559,6 +559,11 @@ begin
 						end; 
 					end;
 					
+					logtext(0,"++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+					logtext(0,"ProceedCCPayTouchScreenDClass");
+					logtext(0,"ivSum " & ivSum);
+					logtext(0,"paidSum " & paidSum);
+					
 					ivSum = IVCashr.Sum4;
 					if (paidSum<0 and IVCashr.Sum4<0) then begin
 					  paidSum = AbsoluteVal(paidSum);
@@ -567,6 +572,7 @@ begin
 					
           if (paidSum>=ivSum and paidSum>=0 and ivSum>=0) then begin
 	        	if (IVCashr.Invalid==0 and IVCashr.OKFlag==0) then begin
+	        	  logtext(0,"IVCashFinish");
 	        	  IVCashFinish(mwn,IVCashr);
 	        	end;
 						goto LProceedCCPayTouchScreenDClass;
