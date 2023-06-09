@@ -3563,7 +3563,8 @@ begin
   end;
   
   vs = 40;
-  EditFieldTLX(fieldh,v=6, fieldh2,"Сумма",M4Val,Normal,0,fntsize,patM4black,vals0,true,0);
+  v = 6;
+  EditFieldTLX(fieldh-40,v+26, 190,"Сумма",M4Val,Normal,0,fntsize,patM4black,vals0,true,0);
   if (LMb.CCRequireAuthCode!=0) then begin
     EnterSkip(f1);
     EditFieldTLX(fieldh,v=v+vs, fieldh2,"Авторизации",M4Str,Normal,20,fntsize,patM4black,f1,false,0);
