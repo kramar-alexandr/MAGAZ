@@ -408,7 +408,7 @@ begin
   if(cardSum>0)then begin
     addtexttoarea("{",request);
       addParamToJSONArea("type",NormalizeStrToJson("CASHLESS"),0,request);
-      addParamToJSONArea("code",2,1,request);
+      addParamToJSONArea("code",0,1,request);
       addParamToJSONArea("value",cardSum,1,request);
       addParamToJSONArea("label",NormalizeStrToJson("Картка"),0,request);
       delLastComaInArea(request);
