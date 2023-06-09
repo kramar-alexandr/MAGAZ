@@ -3568,7 +3568,7 @@ begin
     EnterSkip(f1);
     EditFieldTLX(fieldh,v=v+vs, fieldh2,"Авторизации",M4Str,Normal,20,fntsize,patM4black,f1,false,0);
   end;
-  EditFieldTLX(fieldh,v=v+vs, fieldh2,"Валюта",M4Str,ViewOnly,5,fntsize,patM4black,CurncyCode,false,0);
+  /*EditFieldTLX(fieldh,v=v+vs, fieldh2,"Валюта",M4Str,ViewOnly,5,fntsize,patM4black,CurncyCode,false,0);
   switch (GuiType) begin
     case kGuiAndroid:
     otherwise
@@ -3576,7 +3576,7 @@ begin
 		if (Rahaxib.TerminalType!=kLocalCCTerminalPCEFTPOS and Rahaxib.TerminalType!=kLocalCCTerminalBambora) then begin
 			StaticText(h-165,v,"(Если у Вас есть кред.карта, Вы можете провести её через терминал)",false); // Not Found  
 		end;
-  end;
+  end;*/
   if (GuiType==kGuiiPhone) then begin
     h = 160; h2 = 450;
   end else begin
