@@ -476,11 +476,11 @@ begin
         POSAudit_LogIVCashVcRow(IVCashr,IVCashrw,kPOSEventTypeAddRow);
         IVCashSumup(IVCashr,true);
         IVCashr.MakeFiscalReceiptF = RepSpec.flags[0]; //Edit***************************Sasha2,15:24 13.09.2016
-        if (HasLocalization("HRV")==false) then begin  //DoXMLExport_IVCashVc
+        /*if (HasLocalization("HRV")==false) then begin  //DoXMLExport_IVCashVc
           if (IVCashr.RetValue>=0) then begin
             IVCashr.OKFlag = 1;            
           end;
-        end;
+        end;*/
         PutWindowRecord(mwn,IVCashr);
         WindowFieldGoto(mwn,IVCashr,-1,"touchscreenitem",true);
         IVCashDClass_RefreshStringList(mwn,IVCashr);
