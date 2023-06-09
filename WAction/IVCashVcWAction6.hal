@@ -559,12 +559,14 @@ begin
 						end; 
 					end;
 					
+					ivSum = IVCashr.Sum4;
 					logtext(0,"++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
 					logtext(0,"ProceedCCPayTouchScreenDClass");
 					logtext(0,"ivSum " & ivSum);
 					logtext(0,"paidSum " & paidSum);
+					logtext(0,"IVCashr.OKFlag==0 " & IVCashr.OKFlag);
 					
-					ivSum = IVCashr.Sum4;
+					
 					if (paidSum<0 and IVCashr.Sum4<0) then begin
 					  paidSum = AbsoluteVal(paidSum);
 					  ivSum = AbsoluteVal(IVCashr.Sum4);
