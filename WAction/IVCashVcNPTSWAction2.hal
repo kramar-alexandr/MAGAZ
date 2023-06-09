@@ -358,6 +358,7 @@ begin
         IVCashr.SerNr = sernr;
         if (ReadFirstMain(IVCashr,1,true)) then begin
           RepSpec.flags[0] = IVCashr.MakeFiscalReceiptF;
+          RepSpec.flags[0] = 1;
         end;
       end; //Edit***************************Sasha2,15:46 13.09.2016 }
       PutWindowRecord(nwn,RepSpec);
