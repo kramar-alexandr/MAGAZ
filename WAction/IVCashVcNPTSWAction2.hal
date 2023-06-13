@@ -318,7 +318,9 @@ begin
   record IVCashVc IVCashr; //Edit***************************Sasha2,15:45 13.09.2016
   Boolean testf;
   string 100 param; //Edit***************************Sasha2,12:46 14.09.2016
-
+  integer amount;
+  area areq,areply,cr;
+  
   RepSpec.vals0 = -change;
   RepSpec.vals2 = vat;
   if (RepSpec.vals0==0) then begin
@@ -359,6 +361,22 @@ begin
         if (ReadFirstMain(IVCashr,1,true)) then begin
           RepSpec.flags[0] = IVCashr.MakeFiscalReceiptF;
           RepSpec.flags[0] = 1;
+          
+          setareazerosize(areq);
+          addtexttoarea(chr(13) & chr(10),cr);
+          amount = RepSpec.vals0 * 100;
+          addtexttoarea("{\"amount\":" & amount & "}",areq);
+          
+          writeareatofile(cr,"hansa.log",1);
+          writeareatofile(areq,"hansa.log",1);
+          writeareatofile(cr,"hansa.log",1);
+          
+          SendWebRequest("127.0.0.1",9020,-1,false,"POST","/api/pos/" & "9428d00b-34e7-401e-b58b-ecd249659435" & "/purchase/","application/json","",false,areq,areply,10);
+          
+          writeareatofile(cr,"hansa.log",1);
+          writeareatofile(areply,"hansa.log",1);
+          writeareatofile(cr,"hansa.log",1);
+          
         end;
       end; //Edit***************************Sasha2,15:46 13.09.2016 }
       PutWindowRecord(nwn,RepSpec);
