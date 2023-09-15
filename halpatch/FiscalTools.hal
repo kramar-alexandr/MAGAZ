@@ -273,6 +273,9 @@ begin
       addParamToJSONArea("price",rowSum,1,request);
       addParamToJSONArea("quantity",quant,1,request);      
       taxgroup = 8;//Normal
+      if(INr.Group=="€‹Šƒ")then begin
+        taxgroup = 1;
+      end;
       addtexttoarea("\"taxes\": [" & taxgroup & "],",request);///àëîãîâàß ãğóïïà
       
       if (nonblank(IVCashrw.vRebate) and IVCashrw.Quant>0) then begin
