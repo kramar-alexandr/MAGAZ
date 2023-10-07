@@ -318,7 +318,7 @@ begin
   record IVCashVc IVCashr; //Edit***************************Sasha2,15:45 13.09.2016
   Boolean testf;
   string 100 param; //Edit***************************Sasha2,12:46 14.09.2016
-  integer amount;
+  longint amount;
   area areq,areply,cr;
   
   RepSpec.vals0 = -change;
