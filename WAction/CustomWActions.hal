@@ -468,16 +468,20 @@ procedure ShowMoneyInBoxForIVCash()
 begin
   record FiscalSetLocalBlock Fiskalblock;
   Integer wn;
-  string 30 inBoxFilePath;
+  string 30 inBoxFilePath,cash;
   area inBoxArea;
   val money;
+  area moneyarea;
 
     BlockLoad(Fiskalblock);
     inBoxFilePath = Fiskalblock.StoragePath & "\\" & "InBox.txt";
     
     wn = CurWindow;
     if (GetWindowClass(wn)=="NPTSIVCashDClass") then begin
-      money = CheckCash;
+      addfiletoarea("cashpos.txt",moneyarea,0);
+      cash = getstringfromarea(moneyarea,0,getarealength(moneyarea));
+      money = stringtoval(cash,m4val);
+      //money = CheckCash;
       PutWindowString(wn,"DisplayMoneyInBox",money); 
     end;
   return;
