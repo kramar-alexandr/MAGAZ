@@ -157,6 +157,50 @@ return;
 end;
 
 
+global procedure CheckCashReply(Area reply)
+begin
+  area logarea;
+  json jsonobj;
+  val bal;
+  string 100 resultstr;
+  area moneyarea;
+  
+  jsonobj = ParseJSONArea(reply);
+  resultstr = JSONGet(jsonobj,"status");
+  
+  if(resultstr=="true" or resultstr=="1")then begin
+    resultstr = JSONGet(jsonobj,"report/balance");
+    if(nonblank(resultstr))then begin
+     bal = stringtoval(resultstr,m4val)/100;
+      addtexttoarea(bal,moneyarea);
+      writeareatofile(moneyarea,"cashpos.txt",0);
+     messagebox(0,"Денег в кассе: " & bal);
+    end else begin
+      messagebox(0,"Ошибка!");
+    end;
+    
+    
+  end else begin
+    messagebox(0,"Ошибка!");
+  end;
+  
+  LogRequests(reply,"<<<MakeXReport");
+  
+return;
+end;
+
+global procedure CheckCash()
+begin
+	string 255 command,password,d;
+	area filedata,request,reply;
+	
+	addtexttoarea("{}",request);
+		
+	LogRequests(request,">>>MakeXReport");
+	SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/shift/xreport","application/json; charset=""utf-8""","",false,request,reply,5);
+	CheckCashReply(reply);
+return;
+end;
 
 
 global
@@ -440,6 +484,7 @@ begin
     IVCashr.FiscalCode = JSONGet(jobj,"fiscal_code");
     IVCashr.FiscalDate = JSONGet(jobj,"fiscal_date");
     IVCashr.tax_url = JSONGet(jobj,"tax_url");
+    CheckCash;
   end else begin
     if(JSONGet(jobj,"status")=="NEW")then begin
       IVCashr.FiscalID = JSONGet(jobj,"external_id");
@@ -459,50 +504,6 @@ begin
 	LMakeFiscalReceipt:;
 	MakeFiscalReceipt = res;
 return;	
-end;
-
-
-
-global procedure CheckCashReply(Area reply)
-begin
-  area logarea;
-  json jsonobj;
-  val bal;
-  string 100 resultstr;
-  
-  jsonobj = ParseJSONArea(reply);
-  resultstr = JSONGet(jsonobj,"status");
-  
-  if(resultstr=="true" or resultstr=="1")then begin
-    resultstr = JSONGet(jsonobj,"report/balance");
-    if(nonblank(resultstr))then begin
-     bal = stringtoval(resultstr,m4val)/100;
-     messagebox(0,"Денег в кассе: " & bal);
-    end else begin
-      messagebox(0,"Ошибка!");
-    end;
-    
-    
-  end else begin
-    messagebox(0,"Ошибка!");
-  end;
-  
-  LogRequests(reply,"<<<MakeXReport");
-  
-return;
-end;
-
-global procedure CheckCash()
-begin
-	string 255 command,password,d;
-	area filedata,request,reply;
-	
-	addtexttoarea("{}",request);
-		
-	LogRequests(request,">>>MakeXReport");
-	SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/shift/xreport","application/json; charset=""utf-8""","",false,request,reply,5);
-	CheckCashReply(reply);
-return;
 end;
 
 

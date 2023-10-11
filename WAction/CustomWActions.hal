@@ -439,13 +439,18 @@ begin
   json jsonobj;
   val bal;
   string 100 resultstr;
+  area moneyarea;
   
   jsonobj = ParseJSONArea(reply);
   resultstr = JSONGet(jsonobj,"status");
   
   resultstr = JSONGet(jsonobj,"report/balance");
-  CheckCashReply = stringtoval(resultstr,m4val)/100;
-   
+  
+  bal = stringtoval(resultstr,m4val)/100;
+  addtexttoarea(bal,moneyarea);
+  writeareatofile(moneyarea,"cashpos.txt",0);
+  
+  CheckCashReply = bal;
 return;
 end;
 
@@ -469,7 +474,6 @@ begin
   record FiscalSetLocalBlock Fiskalblock;
   Integer wn;
   string 30 inBoxFilePath,cash;
-  area inBoxArea;
   val money;
   area moneyarea;
 
