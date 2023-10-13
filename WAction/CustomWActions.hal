@@ -459,6 +459,8 @@ begin
 	string 255 command,password,d;
 	area filedata,request,reply;
 	
+	millisleep(1000);
+	
 	addtexttoarea("{}",request);
 
 	SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/shift/xreport","application/json; charset=""utf-8""","",false,request,reply,5);
