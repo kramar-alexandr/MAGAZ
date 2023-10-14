@@ -27,6 +27,8 @@ begin
     RecordField(FiscalDate,M4Str,255,0);
     RecordField(FiscalNum,M4Str,255,0);
     RecordField(tax_url,M4Str,255,0);
+    
+    RecordField(CHB_ID,M4Str,255,0);
 		
 		SubsetKeyBegin2(KSerNr); //Edit***************************Sasha2,11:56 22.09.2016
 		StoreInBaseKey; //Edit***************************Sasha2,11:56 22.09.2016

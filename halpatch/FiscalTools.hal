@@ -2,7 +2,11 @@ external function val AbsoluteVal(val);
 
 SetLangMode(LangRussian,"RUS",0);
 
-
+global function string 100 ipserver()
+begin
+  ipserver = "127.0.0.1";
+  //ipserver = "192.168.88.145";
+end;
 
 procedure PrintTOXprinter(record IVCashVc IVCashr)
 begin
@@ -20,6 +24,13 @@ begin
 	date fdate;
   
   SetExportCodePage("CP1251");
+  
+
+  SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/receipts/" & IVCashr.CHB_ID & "/text","application/json; charset=""utf-8""","",false,request,reply,20);
+
+  writeareatofile(reply,"xprintreceipts.txt",0);
+  RunProgram("c:\\windows\\system32\\cmd.exe","/C \"" & "copy " & "xprint.txt" & " \\\\" & "Giga" & "\\" & "XP-58" & "\"");
+
   
   SetFontA = chr(27) & chr(33) & chr(0);
 	SetFontB = chr(27) & chr(33) & chr(1);
@@ -117,13 +128,6 @@ begin
   
 return;
 end;
-
-global function string 100 ipserver()
-begin
-  ipserver = "127.0.0.1";
-  //ipserver = "192.168.88.145";
-end;
-
 
 function string 255 NormalizeStrToJson (string Str)
 begin
@@ -589,11 +593,12 @@ begin
     SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/receipt/done","application/json; charset=""utf-8""","",false,request,reply,5);
     LogRequests(reply,"<<<Close REceipt");
   
-  
+    
     jobj = parsejsonarea(reply);
     if(JSONGet(jobj,"status")=="DONE")then begin
       messagebox(0,"Продажа фискализирована");
-      IVCashr.FiscalID = JSONGet(jobj,"id");
+      IVCashr.FiscalID = JSONGet(jobj,"external_id");
+      IVCashr.CHB_ID = JSONGet(jobj,"id");
       IVCashr.FiscalNum = JSONGet(jobj,"shift/cash_register/fiscal_number");
       IVCashr.FiscalCode = JSONGet(jobj,"fiscal_code");
       IVCashr.FiscalDate = JSONGet(jobj,"fiscal_date");
@@ -602,8 +607,10 @@ begin
       CheckCash;
     end else begin
       if(JSONGet(jobj,"status")=="NEW")then begin
+        IVCashr.CHB_ID = JSONGet(jobj,"id");  
         IVCashr.FiscalID = JSONGet(jobj,"external_id");
         IVCashr.FiscalDate = JSONGet(jobj,"created_at");
+        
         messagebox(0,"Продажа фискализирована");
       end else begin
         message = JSONGet(jobj,"message");
