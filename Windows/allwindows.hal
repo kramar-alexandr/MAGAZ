@@ -949,6 +949,7 @@ begin
     EditField(h3,v+=vs,-40,"Ћфиц. Ь",Normal,OfficialSerNr2,false,LegalInvNrSClass);
     EditField(h3,v+=vs,50,"”илиал",ViewOnly,BranchID,false,0);
     CheckBox(h3+110,v,0,"”искальн. сч/ф",FiscalFlag);
+    CheckBox(h3+110,v+=vs,0,"”искальн. сч/ф",MakeFiscalReceiptF);// Edit ************************** BPI Ukraine - KramarAlexandr - 06, 14 10 2023 y., 13:17:10
     EditField(h3,v+=vs,82,"“паковщик",Normal,Bagger,false,BaggerSClass);
     CheckBox(h3+110,v,0,"#VAT#",IPBookVAT);
     if (HasLocalization("SWE")) then begin

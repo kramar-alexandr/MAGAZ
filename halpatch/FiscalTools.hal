@@ -4,7 +4,119 @@ SetLangMode(LangRussian,"RUS",0);
 
 
 
+procedure PrintTOXprinter(record IVCashVc IVCashr)
+begin
+  area aprint;
+  string 10 SetLeftAlignment,SetRightAlignment,SetMiddleAlignment,SetTextSize,PrintImage;
+	string 10 SetBoldOn,SetBoldOff,SetUnderlineOn,SetUnderlineOff;
+	string 10 BigLetterOn,BigLetterOff,SmallLetterOn;
+	string 100 SetFontA,SetFontB;
+	integer checklength;
+	integer i,rwcnt;
+	row IVCashVc IVCashrw; 
+	val cash,term;
+	string 255 tstr;
+	time ftime;
+	date fdate;
+  
+  SetExportCodePage("CP1251");
+  
+  SetFontA = chr(27) & chr(33) & chr(0);
+	SetFontB = chr(27) & chr(33) & chr(1);
+	SetLeftAlignment = chr(27) & chr(97) & "0";
+	SetMiddleAlignment = chr(27) & chr(97) & "1";
+	SetRightAlignment = chr(27) & chr(97) & "2";
+	SetBoldOn = chr(27) & chr(69) & "1";
+	SetBoldOff = chr(27) & chr(69) & "0";
+	SetUnderlineOn = chr(27) & chr(45) & "2";
+	SetUnderlineOff = chr(27) & chr(45) & "0";
+	BigLetterOn = chr(27) & chr(33)  & chr(32);
+	SmallLetterOn = chr(27) & chr(33)  & chr(1);
+	BigLetterOff = chr(27) & chr(33) & chr(0);
+	PrintImage = chr(28) & chr(112) & chr(1) & chr(0);
+	
+	checklength = 58;
+  
+  
+  addtexttoarea(SetMiddleAlignment,aprint);
+  addtexttoarea("ФОП ФЕДОРЕНКО ЛЕСЯ IВАНIВНА" & chr(13) & chr(10) ,aprint);
+  addtexttoarea("магазин" & chr(13) & chr(10) ,aprint);
+  addtexttoarea("м. Київ, Днiпровський район, м. Київ. вул." & chr(13) & chr(10) ,aprint);
+  addtexttoarea("С.Стальського,28-А" & chr(13) & chr(10) ,aprint);
+  addtexttoarea("IД 2671307985" & chr(13) & chr(10) ,aprint);
+  
+  addtexttoarea(chr(13) & chr(10) ,aprint);
+  addtexttoarea(chr(13) & chr(10) ,aprint);
+  addtexttoarea(chr(13) & chr(10) ,aprint);
+  addtexttoarea("* * * * * * * * * * * * * * * * * * * * * * * * * * * * " & chr(13) & chr(10) ,aprint);
+  addtexttoarea(chr(13) & chr(10) ,aprint);
+  addtexttoarea(chr(13) & chr(10) ,aprint);
+  
+  rwcnt = matrowcnt(IVCashr);
+  for(i=0;i<rwcnt;i=i+1)begin
+    matrowget(IVCashr,i,IVCashrw);
+    if(IVCashrw.stp==1)then begin
+      addtexttoarea(left(IVCashrw.Spec,58) & chr(13) & chr(10) ,aprint);
+      addtexttoarea("x" & IVCashrw.Quant(13) & "  " & IVCashrw.Price & "         " & IVCashrw.Sum & chr(13) & chr(10) ,aprint);
+    end;
+    if(IVCashrw.stp==kInvoiceRowTypeCreditCardPayment)then begin
+      term = term + IVCashrw.Sum;
+    end;
+    if(IVCashrw.stp==kInvoiceRowTypeCashPayment)then begin
+      cash = cash + IVCashrw.Sum;
+    end;
+  end;
+  
+  addtexttoarea(chr(13) & chr(10) ,aprint);
+  addtexttoarea(chr(13) & chr(10) ,aprint);
+  if(cash!=0)then begin
+    addtexttoarea("Готiвка: " & cash & " грн" & chr(13) & chr(10) ,aprint);
+  end;
+  if(cash!=0)then begin
+    addtexttoarea("Термiнал:" & term & chr(13) & chr(10) ,aprint);
+  end;
+  
+  addtexttoarea(chr(13) & chr(10) ,aprint);
+  addtexttoarea(chr(13) & chr(10) ,aprint);
+  addtexttoarea("ВСЬОГО" & IVCashr.Sum4 & chr(13) & chr(10) ,aprint);
+  
+  ftime = CurrentTime;
+  if(nonblank(IVCashr.FiscalDate))then begin //==================== Время фискального чека
+    ftime = stringtotime(mid(IVCashr.FiscalDate,11,8));
+    ftime = addhours(ftime,3);
+  end;
 
+  fdate.day = stringtoint(mid(IVCashr.FiscalDate,8,2));
+  fdate.month = stringtoint(mid(IVCashr.FiscalDate,5,2));
+  fdate.year = stringtoint(left(IVCashr.FiscalDate,4));
+  
+  addtexttoarea(SetMiddleAlignment,aprint);
+  tstr = "Чек №" & " " & IVCashr.FiscalCode; //ФИскальнй номер чека
+  addtexttoarea(tstr & chr(10),aprint); tstr ="";
+  
+  tstr = fdate & " об " & ftime; ////ФИскальнй дата
+  addtexttoarea(tstr & chr(10),aprint); tstr ="";
+  
+  tstr = "ФН: " & IVCashr.FiscalNum; ////ФИскальнй номер кассы
+  addtexttoarea(tstr & chr(10),aprint); tstr ="";
+  
+  addtexttoarea(chr(13) & chr(10) ,aprint);
+  addtexttoarea(chr(13) & chr(10) ,aprint);
+  addtexttoarea(chr(13) & chr(10) ,aprint);
+  addtexttoarea("ФIСКАЛЬНИЙ ЧЕК" & chr(13) & chr(10) ,aprint);
+  addtexttoarea(chr(13) & chr(10) ,aprint);
+  addtexttoarea(chr(13) & chr(10) ,aprint);
+  addtexttoarea(chr(13) & chr(10) ,aprint);
+  addtexttoarea(chr(13) & chr(10) ,aprint);
+  addtexttoarea(chr(13) & chr(10) ,aprint);
+  addtexttoarea(chr(13) & chr(10) ,aprint);
+  
+  writeareatofile(aprint,"xprint.txt",0);
+  RunProgram("c:\\windows\\system32\\cmd.exe","/C \"" & "copy " & "xprint.txt" & " \\\\" & "Giga" & "\\" & "XP-58" & "\"");
+
+  
+return;
+end;
 
 global function string 100 ipserver()
 begin
@@ -222,280 +334,285 @@ begin
 	json jobj;
 	area request,reply;
 	
-	if(currentuser!="PER1")then begin
-   // goto lMakeFiscalReceipt;
-	end;
-	
-  d = "!===!"; 	//divider
+	if(blank(IVCashr.tax_url) and blank(IVCashr.FiscalNum) and blank(IVCashr.FiscalID) and blank(IVCashr.FiscalDate))then begin
+  
+    if(currentuser!="PER1")then begin
+     // goto lMakeFiscalReceipt;
+    end;
+  
+    d = "!===!"; 	//divider
 
-  saleCommand = "SaleEx";
-  payCommand = "Payment";
-  rebateCommand = "Discount";
-  refundCommand  = "PayMoney";
-  commentCommand = "Comment";  
-  nalogGroup = "0";
-  discountType = 0; //absolute value of discount
-  totalRebate= 0 ;
-  giftSum = 0;
-  cardSum = 0;
-  prepaymentSum = 0;
-	rwcnt = MatRowCnt(IVCashr);
-	res = true;
-		
-	for(i=0;i<rwcnt;i=i+1) begin
-	  MatRowGet(IVCashr,i,IVCashrw);
-    if (IVCashrw.stp==kInvoiceRowTypeCreditCardPayment and IVCashrw.PayMode=="GC" and IVCashr.Sum4<0 ) then begin //Edit----------------------Dima  08.09.2015
+    saleCommand = "SaleEx";
+    payCommand = "Payment";
+    rebateCommand = "Discount";
+    refundCommand  = "PayMoney";
+    commentCommand = "Comment";  
+    nalogGroup = "0";
+    discountType = 0; //absolute value of discount
+    totalRebate= 0 ;
+    giftSum = 0;
+    cardSum = 0;
+    prepaymentSum = 0;
+    rwcnt = MatRowCnt(IVCashr);
+    res = true;
+    
+    for(i=0;i<rwcnt;i=i+1) begin
+      MatRowGet(IVCashr,i,IVCashrw);
+      if (IVCashrw.stp==kInvoiceRowTypeCreditCardPayment and IVCashrw.PayMode=="GC" and IVCashr.Sum4<0 ) then begin //Edit----------------------Dima  08.09.2015
+        res = false;
+        goto LMakeFiscalReceipt;
+      end;	
+    end;
+  
+  
+    if(rwcnt==0)then begin
       res = false;
       goto LMakeFiscalReceipt;
-    end;	
-	end;
-	
-	
-	if(rwcnt==0)then begin
-	  res = false;
-    goto LMakeFiscalReceipt;
-	end;
-	
-	
-	setareazerosize(request);
-	addtexttoarea("{",request);
-	addParamToJSONArea("commit_transaction",NormalizeStrToJson("true"),0,request);
-	delLastComaInArea(request);
-	addtexttoarea("}",request);
-	LogRequests(request,">>>Create REceipt");
-	SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/receipt","application/json; charset=""utf-8""","",false,request,reply,5);
-	LogRequests(reply,"<<<Create REceipt");
-	
-	
-	for(i=0;i<rwcnt;i=i+1) begin
-		MatRowGet(IVCashr,i,IVCashrw);
-		printStatus = 0;
-		if (IVCashrw.stp == kInvoiceRowTypeNormal and nonblank(IVCashrw.ArtCode)) then begin
-		  curNalogGroup = nalogGroup;
-		  INr.Code = IVCashrw.ArtCode;
-		  if (ReadFirstMain(INr,1,true)) then begin
-		    if (NonBlank(INr.Group)) then begin
-		      ITr.Code = INr.Group;
-		      if (ReadFirstMain(ITr,1,true) and NonBlank(ITr.VATCodeDom)) then begin
-		        curNalogGroup = ITr.VATCodeDom;
-		      end;
-		    end;
-		  end;
-		  	
-			if (IVCashrw.Quant>0) then begin
-				command = saleCommand;
-				rowSum = IVCashrw.Price * 100;
-			end else begin	
-				command = refundCommand;	
-				rowSum = (IVCashrw.Sum * 100) / IVCashrw.Quant;	
-			end;
-			
-			tempInt = IVCashrw.Quant;
-			if (tempInt!=IVCashrw.Quant) then begin
-			  quant = AbsoluteVal(IVCashrw.Quant)*1000;
-			  printStatus = 3;
-			end else begin
-			  quant = AbsoluteVal(IVCashrw.Quant);
-			end;
-			quant = AbsoluteVal(IVCashrw.Quant)*1000;
-			
-			articul = IVCashr.SerNr & i;
-			rowStr = command & d & quant & d & printStatus  & d &  "false" & d &  rowSum & d & curNalogGroup & d &  "false" & d & IVCashrw.Spec & d & articul & d; 
-			AddTextToArea(rowStr,filedata);	
-				
-			if (nonblank(IVCashrw.vRebate) and IVCashrw.Quant>0) then begin
-				rowSum = (AbsoluteVal(IVCashrw.Quant)*IVCashrw.Price - (AbsoluteVal(IVCashrw.Sum)))*100;
-				rowStr = rebateCommand & d & discountType & d & rowSum  & d &  USetStr(31067)  & d;
-				AddTextToArea(rowStr,filedata);
-			end;
-			
-			//====================================================================================================>>>>>>>
-			setareazerosize(request);
-      addtexttoarea("{",request);
-      addParamToJSONArea("code",NormalizeStrToJson(IVCashrw.ArtCode),0,request);
-      addParamToJSONArea("name",NormalizeStrToJson(IVCashrw.Spec),0,request);
-      addParamToJSONArea("price",rowSum,1,request);
-      addParamToJSONArea("quantity",quant,1,request);      
-      taxgroup = 8;//Normal
-      if(INr.Group=="АЛКОГ")then begin
-        taxgroup = 1;
-      end;
-      addtexttoarea("\"taxes\": [" & taxgroup & "],",request);///Налоговая группа
-      
-      if (nonblank(IVCashrw.vRebate) and IVCashrw.Quant>0) then begin
-        addtexttoarea("\"discounts\": [{",request);
-        addtexttoarea("\"type\": \"DISCOUNT\",",request);
-        addtexttoarea("\"mode\": \"PERCENT\",",request);
-        addParamToJSONArea("value",stringtoval(IVCashrw.vRebate,m4val),1,request);
-        addtexttoarea("\"tax_codes\": [0]",request);
-        addParamToJSONArea("price",rowSum,1,request);
-        delLastComaInArea(request);
-        addtexttoarea("}]",request);
-				rowSum = (AbsoluteVal(IVCashrw.Quant)*IVCashrw.Price - (AbsoluteVal(IVCashrw.Sum)))*100;
-				rowStr = rebateCommand & d & discountType & d & rowSum  & d &  USetStr(31067)  & d;
-				AddTextToArea(rowStr,filedata);
-			end;
-      
-      if(nonblank(IVCashrw.SerialNr))then begin
-        addParamToJSONArea("barcode",IVCashrw.SerialNr,0,request);
-      end;
-      
-      if (IVCashrw.Quant>0) then begin
-				addParamToJSONArea("is_return","false",1,request);
-			end else begin	
-				addParamToJSONArea("is_return","true",1,request);
-			end;
-      
-      delLastComaInArea(request);
-      addtexttoarea("}",request);
-      LogRequests(request,">>>Add Good");
-      SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/receipt/good","application/json; charset=""utf-8""","",false,request,reply,5);
-      LogRequests(reply,"<<<Add Good");
-			//====================================================================================================>>>>>>>			
-		end;
-		
-		if (IVCashrw.stp == kInvoiceRowTypeGiftVoucherSold) then begin
-			rowSum = IVCashrw.Sum * 100;
-			quant = 1;
-			name = USetStr(31068) & IVCashrw.GCNr & "  " & IVCashrw.Spec;
-			articul = IVCashr.SerNr & i;
-			//if (blank(name)) then begin name = USetStr(31064); end;
-			rowStr = saleCommand & d & quant & d & printStatus  & d &  "false" & d &  rowSum & d & nalogGroup & d &  "false" & d & name & d & articul & d; 
-			AddTextToArea(rowStr,filedata);
-		end;		
-		
-		if (IVCashrw.stp==kInvoiceRowTypeCashPayment) then begin
-			paymentStatus = 3;
-			cashSum = AbsoluteVal(IVCashrw.Sum) * 100;
-		end;
-		if (IVCashrw.stp==kInvoiceRowTypeCreditCardPayment and IVCashrw.PayMode!="GC") then begin //Edit***************************Sasha2,15:02 27.07.2015
-			paymentStatus = 0;
-			cardSum = cardSum + AbsoluteVal(IVCashrw.Sum) * 100;
-		end;
-		
-		if (IVCashrw.stp==kInvoiceRowTypeGiftVoucherPayment or (IVCashrw.PayMode=="GC" and IVCashrw.stp!=kInvoiceRowTypeGiftVoucherSold)) then begin //Edit***************************Sasha2,15:02 27.07.2015
-			if (IVCashrw.GCNr>0) then begin
-			  VoucherNumbers[VoucherNumbers.length] = IVCashrw.GCNr;
-			end else begin
-			  VoucherNumbers[VoucherNumbers.length] = 0;
-			end;
-			VoucherSum[VoucherSum.length] =  AbsoluteVal(IVCashrw.Sum) * 100;
-		end;
-		
-		if (IVCashrw.stp==kInvoiceRowTypePrepayment) then begin
-			prepaymentSum =prepaymentSum + AbsoluteVal(IVCashrw.Sum) * 100;
-		end;						
-		
-	end;
-	
-	
-	
-	//Gift voucher payment---------------------------
-	if (VoucherSum.length>0) then begin
-			discountType = 4; //discount on the total sum
-			for(i=0;i<VoucherSum.length;i=i+1) begin							
-				rowStr = rebateCommand & d & discountType & d & VoucherSum[i]  & d &  USetStr(31066) & d; 
-				giftSum = giftSum + VoucherSum[i];
-				AddTextToArea(rowStr,filedata);	//Gift voucher
-				rowStr = commentCommand & d & USetStr(31072)  & VoucherNumbers[i] & d & "false" &  d ;
-				AddTextToArea(rowStr,filedata);	//was used
-				giftBalance = GetRemainingVoucherSum(VoucherNumbers[i]);
-				if (giftBalance>0) then begin
-						rowStr = commentCommand & d & USetStr(31069)  & giftBalance & d & "false" &  d ;
-						AddTextToArea(rowStr,filedata);
-				end;
-			end;
-	end;
-	
-	//prepayment---------------------------
-	if(prepaymentSum>0) then begin
-		discountType = 4;
-		rowStr = rebateCommand & d & discountType & d & prepaymentSum  & d &  USetStr(31071) & d;
-		AddTextToArea(rowStr,filedata);		 
-	end;
-	
-	//payment by card and cash---------------------------
-	if (cardSum>0 and cashSum>0) then begin	
-		paymentStatus = 3;
-		rowStr = payCommand & d & paymentStatus & d & cashSum & "???" & cardSum & d &  "false" & d & "true" & d ;
-		AddTextToArea(rowStr,filedata); 
-	end else begin	
-		if (cashSum>0) then begin
-				paymentStatus = 3;
-				rowStr = payCommand & d & paymentStatus & d & cashSum & d &  "false" & d & "true" & d ;
-				AddTextToArea(rowStr,filedata);
-		end;	
-		if (cardSum>0) then begin
-				paymentStatus = 0;
-				rowStr = payCommand & d & paymentStatus & d & cardSum & d &  "true" & d & "true" & d ;
-				AddTextToArea(rowStr,filedata);
-		end;
-				
-	end;
-	
-	totSum = AbsoluteVal(IVCashr.Sum4*100);
-	if (totSum>0  and  ((giftSum >= totSum) or (prepaymentSum >= totSum))) then begin	//for closing of receipt
-				paymentStatus = 3;
-				rowStr = payCommand & d & paymentStatus & d & "0" & d &  "false" & d & "true" & d ;
-				AddTextToArea(rowStr,filedata);
-	end;	
-
-
-	AddTextToArea(chr(13) & "<END>",filedata);
-	
-	
-	//====================================================================================================>>>>>>>
-	setareazerosize(request);
-	addtexttoarea("{",request);
-	
-	addtexttoarea("\"payments\": [",request);
-	  
-  cashSum = totSum - cardSum;
-  
-  if(cardSum>0)then begin
-    addtexttoarea("{",request);
-      addParamToJSONArea("type",NormalizeStrToJson("CASHLESS"),0,request);
-      addParamToJSONArea("code",2,1,request);
-      addParamToJSONArea("value",cardSum,1,request);
-      addParamToJSONArea("label",NormalizeStrToJson("Картка"),0,request);
-      delLastComaInArea(request);
-    addtexttoarea("},",request);
-  end;
-  if(cashSum>0)then begin
-    addtexttoarea("{",request);
-      addParamToJSONArea("type",NormalizeStrToJson("CASH"),0,request);
-      addParamToJSONArea("value",cashSum,1,request);
-      addParamToJSONArea("label",NormalizeStrToJson("Готівка"),0,request);
-      delLastComaInArea(request);
-    addtexttoarea("},",request);
-	end;
-	delLastComaInArea(request);
-	addtexttoarea("]}",request);
-	LogRequests(request,">>>Close REceipt");
-	SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/receipt/done","application/json; charset=""utf-8""","",false,request,reply,5);
-	LogRequests(reply,"<<<Close REceipt");
-	
-	
-	jobj = parsejsonarea(reply);
-	if(JSONGet(jobj,"status")=="DONE")then begin
-	  messagebox(0,"Продажа фискализирована");
-    IVCashr.FiscalID = JSONGet(jobj,"id");
-    IVCashr.FiscalNum = JSONGet(jobj,"shift/cash_register/fiscal_number");
-    IVCashr.FiscalCode = JSONGet(jobj,"fiscal_code");
-    IVCashr.FiscalDate = JSONGet(jobj,"fiscal_date");
-    IVCashr.tax_url = JSONGet(jobj,"tax_url");
-    CheckCash;
-  end else begin
-    if(JSONGet(jobj,"status")=="NEW")then begin
-      IVCashr.FiscalID = JSONGet(jobj,"external_id");
-      IVCashr.FiscalDate = JSONGet(jobj,"created_at");
-      messagebox(0,"Продажа фискализирована");
-    end else begin
-      message = JSONGet(jobj,"message");
-      messagebox(0,"Ошибка фискализации " & message);
     end;
-  end;
-	
+  
+  
+    setareazerosize(request);
+    addtexttoarea("{",request);
+    addParamToJSONArea("commit_transaction",NormalizeStrToJson("true"),0,request);
+    delLastComaInArea(request);
+    addtexttoarea("}",request);
+    LogRequests(request,">>>Create REceipt");
+    SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/receipt","application/json; charset=""utf-8""","",false,request,reply,5);
+    LogRequests(reply,"<<<Create REceipt");
+  
+  
+    for(i=0;i<rwcnt;i=i+1) begin
+      MatRowGet(IVCashr,i,IVCashrw);
+      printStatus = 0;
+      if (IVCashrw.stp == kInvoiceRowTypeNormal and nonblank(IVCashrw.ArtCode)) then begin
+        curNalogGroup = nalogGroup;
+        INr.Code = IVCashrw.ArtCode;
+        if (ReadFirstMain(INr,1,true)) then begin
+          if (NonBlank(INr.Group)) then begin
+            ITr.Code = INr.Group;
+            if (ReadFirstMain(ITr,1,true) and NonBlank(ITr.VATCodeDom)) then begin
+              curNalogGroup = ITr.VATCodeDom;
+            end;
+          end;
+        end;
+        
+        if (IVCashrw.Quant>0) then begin
+          command = saleCommand;
+          rowSum = IVCashrw.Price * 100;
+        end else begin	
+          command = refundCommand;	
+          rowSum = (IVCashrw.Sum * 100) / IVCashrw.Quant;	
+        end;
+      
+        tempInt = IVCashrw.Quant;
+        if (tempInt!=IVCashrw.Quant) then begin
+          quant = AbsoluteVal(IVCashrw.Quant)*1000;
+          printStatus = 3;
+        end else begin
+          quant = AbsoluteVal(IVCashrw.Quant);
+        end;
+        quant = AbsoluteVal(IVCashrw.Quant)*1000;
+      
+        articul = IVCashr.SerNr & i;
+        rowStr = command & d & quant & d & printStatus  & d &  "false" & d &  rowSum & d & curNalogGroup & d &  "false" & d & IVCashrw.Spec & d & articul & d; 
+        AddTextToArea(rowStr,filedata);	
+        
+        if (nonblank(IVCashrw.vRebate) and IVCashrw.Quant>0) then begin
+          rowSum = (AbsoluteVal(IVCashrw.Quant)*IVCashrw.Price - (AbsoluteVal(IVCashrw.Sum)))*100;
+          rowStr = rebateCommand & d & discountType & d & rowSum  & d &  USetStr(31067)  & d;
+          AddTextToArea(rowStr,filedata);
+        end;
+      
+        //====================================================================================================>>>>>>>
+        setareazerosize(request);
+        addtexttoarea("{",request);
+        addParamToJSONArea("code",NormalizeStrToJson(IVCashrw.ArtCode),0,request);
+        addParamToJSONArea("name",NormalizeStrToJson(IVCashrw.Spec),0,request);
+        addParamToJSONArea("price",rowSum,1,request);
+        addParamToJSONArea("quantity",quant,1,request);      
+        taxgroup = 8;//Normal
+        if(INr.Group=="АЛКОГ")then begin
+          taxgroup = 1;
+        end;
+        addtexttoarea("\"taxes\": [" & taxgroup & "],",request);///Налоговая группа
+      
+        if (nonblank(IVCashrw.vRebate) and IVCashrw.Quant>0) then begin
+          addtexttoarea("\"discounts\": [{",request);
+          addtexttoarea("\"type\": \"DISCOUNT\",",request);
+          addtexttoarea("\"mode\": \"PERCENT\",",request);
+          addParamToJSONArea("value",stringtoval(IVCashrw.vRebate,m4val),1,request);
+          addtexttoarea("\"tax_codes\": [0]",request);
+          addParamToJSONArea("price",rowSum,1,request);
+          delLastComaInArea(request);
+          addtexttoarea("}]",request);
+          rowSum = (AbsoluteVal(IVCashrw.Quant)*IVCashrw.Price - (AbsoluteVal(IVCashrw.Sum)))*100;
+          rowStr = rebateCommand & d & discountType & d & rowSum  & d &  USetStr(31067)  & d;
+          AddTextToArea(rowStr,filedata);
+        end;
+      
+        if(nonblank(IVCashrw.SerialNr))then begin
+          addParamToJSONArea("barcode",IVCashrw.SerialNr,0,request);
+        end;
+      
+        if (IVCashrw.Quant>0) then begin
+          addParamToJSONArea("is_return","false",1,request);
+        end else begin	
+          addParamToJSONArea("is_return","true",1,request);
+        end;
+      
+        delLastComaInArea(request);
+        addtexttoarea("}",request);
+        LogRequests(request,">>>Add Good");
+        SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/receipt/good","application/json; charset=""utf-8""","",false,request,reply,5);
+        LogRequests(reply,"<<<Add Good");
+        //====================================================================================================>>>>>>>			
+      end;
+    
+      if (IVCashrw.stp == kInvoiceRowTypeGiftVoucherSold) then begin
+        rowSum = IVCashrw.Sum * 100;
+        quant = 1;
+        name = USetStr(31068) & IVCashrw.GCNr & "  " & IVCashrw.Spec;
+        articul = IVCashr.SerNr & i;
+        //if (blank(name)) then begin name = USetStr(31064); end;
+        rowStr = saleCommand & d & quant & d & printStatus  & d &  "false" & d &  rowSum & d & nalogGroup & d &  "false" & d & name & d & articul & d; 
+        AddTextToArea(rowStr,filedata);
+      end;		
+    
+      if (IVCashrw.stp==kInvoiceRowTypeCashPayment) then begin
+        paymentStatus = 3;
+        cashSum = AbsoluteVal(IVCashrw.Sum) * 100;
+      end;
+      if (IVCashrw.stp==kInvoiceRowTypeCreditCardPayment and IVCashrw.PayMode!="GC") then begin //Edit***************************Sasha2,15:02 27.07.2015
+        paymentStatus = 0;
+        cardSum = cardSum + AbsoluteVal(IVCashrw.Sum) * 100;
+      end;
+    
+      if (IVCashrw.stp==kInvoiceRowTypeGiftVoucherPayment or (IVCashrw.PayMode=="GC" and IVCashrw.stp!=kInvoiceRowTypeGiftVoucherSold)) then begin //Edit***************************Sasha2,15:02 27.07.2015
+        if (IVCashrw.GCNr>0) then begin
+          VoucherNumbers[VoucherNumbers.length] = IVCashrw.GCNr;
+        end else begin
+          VoucherNumbers[VoucherNumbers.length] = 0;
+        end;
+        VoucherSum[VoucherSum.length] =  AbsoluteVal(IVCashrw.Sum) * 100;
+      end;
+    
+      if (IVCashrw.stp==kInvoiceRowTypePrepayment) then begin
+        prepaymentSum =prepaymentSum + AbsoluteVal(IVCashrw.Sum) * 100;
+      end;						
+    
+    end;
+  
+  
+  
+    //Gift voucher payment---------------------------
+    if (VoucherSum.length>0) then begin
+        discountType = 4; //discount on the total sum
+        for(i=0;i<VoucherSum.length;i=i+1) begin							
+          rowStr = rebateCommand & d & discountType & d & VoucherSum[i]  & d &  USetStr(31066) & d; 
+          giftSum = giftSum + VoucherSum[i];
+          AddTextToArea(rowStr,filedata);	//Gift voucher
+          rowStr = commentCommand & d & USetStr(31072)  & VoucherNumbers[i] & d & "false" &  d ;
+          AddTextToArea(rowStr,filedata);	//was used
+          giftBalance = GetRemainingVoucherSum(VoucherNumbers[i]);
+          if (giftBalance>0) then begin
+              rowStr = commentCommand & d & USetStr(31069)  & giftBalance & d & "false" &  d ;
+              AddTextToArea(rowStr,filedata);
+          end;
+        end;
+    end;
+  
+    //prepayment---------------------------
+    if(prepaymentSum>0) then begin
+      discountType = 4;
+      rowStr = rebateCommand & d & discountType & d & prepaymentSum  & d &  USetStr(31071) & d;
+      AddTextToArea(rowStr,filedata);		 
+    end;
+  
+    //payment by card and cash---------------------------
+    if (cardSum>0 and cashSum>0) then begin	
+      paymentStatus = 3;
+      rowStr = payCommand & d & paymentStatus & d & cashSum & "???" & cardSum & d &  "false" & d & "true" & d ;
+      AddTextToArea(rowStr,filedata); 
+    end else begin	
+      if (cashSum>0) then begin
+          paymentStatus = 3;
+          rowStr = payCommand & d & paymentStatus & d & cashSum & d &  "false" & d & "true" & d ;
+          AddTextToArea(rowStr,filedata);
+      end;	
+      if (cardSum>0) then begin
+          paymentStatus = 0;
+          rowStr = payCommand & d & paymentStatus & d & cardSum & d &  "true" & d & "true" & d ;
+          AddTextToArea(rowStr,filedata);
+      end;
+        
+    end;
+  
+    totSum = AbsoluteVal(IVCashr.Sum4*100);
+    if (totSum>0  and  ((giftSum >= totSum) or (prepaymentSum >= totSum))) then begin	//for closing of receipt
+          paymentStatus = 3;
+          rowStr = payCommand & d & paymentStatus & d & "0" & d &  "false" & d & "true" & d ;
+          AddTextToArea(rowStr,filedata);
+    end;	
+
+
+    AddTextToArea(chr(13) & "<END>",filedata);
+  
+  
+    //====================================================================================================>>>>>>>
+    setareazerosize(request);
+    addtexttoarea("{",request);
+  
+    addtexttoarea("\"payments\": [",request);
+    
+    cashSum = totSum - cardSum;
+  
+    if(cardSum>0)then begin
+      addtexttoarea("{",request);
+        addParamToJSONArea("type",NormalizeStrToJson("CASHLESS"),0,request);
+        addParamToJSONArea("code",2,1,request);
+        addParamToJSONArea("value",cardSum,1,request);
+        addParamToJSONArea("label",NormalizeStrToJson("Картка"),0,request);
+        delLastComaInArea(request);
+      addtexttoarea("},",request);
+    end;
+    if(cashSum>0)then begin
+      addtexttoarea("{",request);
+        addParamToJSONArea("type",NormalizeStrToJson("CASH"),0,request);
+        addParamToJSONArea("value",cashSum,1,request);
+        addParamToJSONArea("label",NormalizeStrToJson("Готівка"),0,request);
+        delLastComaInArea(request);
+      addtexttoarea("},",request);
+    end;
+    delLastComaInArea(request);
+    addtexttoarea("]}",request);
+    LogRequests(request,">>>Close REceipt");
+    SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/receipt/done","application/json; charset=""utf-8""","",false,request,reply,5);
+    LogRequests(reply,"<<<Close REceipt");
+  
+  
+    jobj = parsejsonarea(reply);
+    if(JSONGet(jobj,"status")=="DONE")then begin
+      messagebox(0,"Продажа фискализирована");
+      IVCashr.FiscalID = JSONGet(jobj,"id");
+      IVCashr.FiscalNum = JSONGet(jobj,"shift/cash_register/fiscal_number");
+      IVCashr.FiscalCode = JSONGet(jobj,"fiscal_code");
+      IVCashr.FiscalDate = JSONGet(jobj,"fiscal_date");
+      IVCashr.tax_url = JSONGet(jobj,"tax_url");
+      PrintTOXprinter(IVCashr);
+      CheckCash;
+    end else begin
+      if(JSONGet(jobj,"status")=="NEW")then begin
+        IVCashr.FiscalID = JSONGet(jobj,"external_id");
+        IVCashr.FiscalDate = JSONGet(jobj,"created_at");
+        messagebox(0,"Продажа фискализирована");
+      end else begin
+        message = JSONGet(jobj,"message");
+        messagebox(0,"Ошибка фискализации " & message);
+      end;
+    end;
+  end else begin
+	  PrintTOXprinter(IVCashr);
+	end;
 	
 	
 	//====================================================================================================>>>>>>>
