@@ -10,7 +10,7 @@ end;
 
 procedure PrintTOXprinter(record IVCashVc IVCashr)
 begin
-  area aprint;
+  area aprint,request,reply;
   string 10 SetLeftAlignment,SetRightAlignment,SetMiddleAlignment,SetTextSize,PrintImage;
 	string 10 SetBoldOn,SetBoldOff,SetUnderlineOn,SetUnderlineOff;
 	string 10 BigLetterOn,BigLetterOff,SmallLetterOn;
@@ -29,8 +29,9 @@ begin
   SendWebRequest(ipserver,9200,-1,false,"POST","/api/v1/receipts/" & IVCashr.CHB_ID & "/text","application/json; charset=""utf-8""","",false,request,reply,20);
 
   writeareatofile(reply,"xprintreceipts.txt",0);
-  RunProgram("c:\\windows\\system32\\cmd.exe","/C \"" & "copy " & "xprint.txt" & " \\\\" & "Giga" & "\\" & "XP-58" & "\"");
-
+  RunProgram("c:\\windows\\system32\\cmd.exe","/C \"" & "copy " & "xprintreceipts.txt" & " \\\\" & "Giga" & "\\" & "XP-58" & "\"");
+  
+  millisleep(1000);
   
   SetFontA = chr(27) & chr(33) & chr(0);
 	SetFontB = chr(27) & chr(33) & chr(1);
