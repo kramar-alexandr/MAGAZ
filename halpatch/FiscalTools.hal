@@ -22,7 +22,7 @@ begin
 	string 255 tstr;
 	time ftime;
 	date fdate;
-  
+  /*
   SetExportCodePage("CP1251");
   
   if(blank(IVCashr.CHB_ID))then begin end;
@@ -130,7 +130,7 @@ begin
   writeareatofile(aprint,"xprint.txt",0);
   //RunProgram("c:\\windows\\system32\\cmd.exe","/C \"" & "copy " & "xprint.txt" & " \\\\" & "Giga" & "\\" & "XP-58" & "\"");
 
-  
+  */
 return;
 end;
 
