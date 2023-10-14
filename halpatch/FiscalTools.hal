@@ -8,7 +8,7 @@ begin
   //ipserver = "192.168.88.145";
 end;
 
-procedure PrintTOXprinter(record IVCashVc IVCashr)
+updating procedure PrintTOXprinter(record IVCashVc IVCashr)
 begin
   area aprint,request,reply;
   string 10 SetLeftAlignment,SetRightAlignment,SetMiddleAlignment,SetTextSize,PrintImage;
@@ -25,11 +25,15 @@ begin
   
   SetExportCodePage("CP1251");
   
+  if(blank(IVCashr.CHB_ID))then begin end;
+      SendWebRequest(ipserver,9200,-1,false,"GET","/api/v1/receipts/" & IVCashr.CHB_ID & "/text","","",false,request,reply,20);
+
+  end;
   logtext(0,"/api/v1/receipts/" & IVCashr.CHB_ID & "/text");
   SendWebRequest(ipserver,9200,-1,false,"GET","/api/v1/receipts/" & IVCashr.CHB_ID & "/text","","",false,request,reply,20);
 
   writeareatofile(reply,"xprintreceipts.txt",0);
-  RunProgram("c:\\windows\\system32\\cmd.exe","/C \"" & "copy " & "xprintreceipts.txt" & " \\\\" & "Giga" & "\\" & "XP-58" & "\"");
+  //RunProgram("c:\\windows\\system32\\cmd.exe","/C \"" & "copy " & "xprintreceipts.txt" & " \\\\" & "Giga" & "\\" & "XP-58" & "\"");
   
   millisleep(1000);
   
@@ -124,7 +128,7 @@ begin
   addtexttoarea(chr(13) & chr(10) ,aprint);
   
   writeareatofile(aprint,"xprint.txt",0);
-  RunProgram("c:\\windows\\system32\\cmd.exe","/C \"" & "copy " & "xprint.txt" & " \\\\" & "Giga" & "\\" & "XP-58" & "\"");
+  //RunProgram("c:\\windows\\system32\\cmd.exe","/C \"" & "copy " & "xprint.txt" & " \\\\" & "Giga" & "\\" & "XP-58" & "\"");
 
   
 return;
