@@ -25,8 +25,8 @@ begin
   
   SetExportCodePage("CP1251");
   
-
-  SendWebRequest(ipserver,9200,-1,false,"GET","/api/v1/receipts/" & IVCashr.CHB_ID & "/text","application/json; charset=""utf-8""","",false,request,reply,20);
+  logtext(0,"/api/v1/receipts/" & IVCashr.CHB_ID & "/text");
+  SendWebRequest(ipserver,9200,-1,false,"GET","/api/v1/receipts/" & IVCashr.CHB_ID & "/text","","",false,request,reply,20);
 
   writeareatofile(reply,"xprintreceipts.txt",0);
   RunProgram("c:\\windows\\system32\\cmd.exe","/C \"" & "copy " & "xprintreceipts.txt" & " \\\\" & "Giga" & "\\" & "XP-58" & "\"");
