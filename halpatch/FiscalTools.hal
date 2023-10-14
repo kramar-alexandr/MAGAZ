@@ -611,7 +611,7 @@ begin
         IVCashr.CHB_ID = JSONGet(jobj,"id");  
         IVCashr.FiscalID = JSONGet(jobj,"external_id");
         IVCashr.FiscalDate = JSONGet(jobj,"created_at");
-        
+        PrintTOXprinter(IVCashr);
         messagebox(0,"Продажа фискализирована");
       end else begin
         message = JSONGet(jobj,"message");
