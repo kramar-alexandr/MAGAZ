@@ -359,7 +359,7 @@ begin
   Integer sernrf;
   Integer nwn;
   record RcVc RepSpec;
-  Boolean res,ReturnModef,varf;
+  Boolean res,ReturnModef,varf,sercheck;
   Integer suspended;
   string 60 sz,msk,mskrep;
   string 200 varsubset;
@@ -430,7 +430,12 @@ begin
         POSAudit_LogIVCashVcRow(IVCashr,IVCashrw,kPOSEventTypeAddRow);
         INr.Code = IVCashrw.ArtCode;
         if(readfirstmain(INr,1,true))then begin
-          if(INr.Group=="€‹Šƒ")then begin
+          switch(INr.Group)begin
+            case "€‹Šƒ":sercheck = true;
+            case "‚ˆ":sercheck = true;
+            case "‚„Š€":sercheck = true;
+          end;
+          if(sercheck)then begin
             RepSpec.long1 = rownr;
             nwn = OpenWindow("SerialNoScanNPTSSClass",0,wn,"","",RepSpec);
             selectwindow(nwn);
