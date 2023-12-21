@@ -191,6 +191,9 @@ begin
         windowdook(wn,0);
       
       end;
+    end else begin
+      CloseWindow(nwn);
+      messagebox(0,"Деякі товари заборонено продавати до 11 та після 22 по терміналу");
     end;
   end;
   
