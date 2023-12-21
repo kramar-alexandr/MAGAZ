@@ -12,6 +12,8 @@ external function Boolean ReadFirstItem(string,var record INVc,Boolean,Boolean);
 external procedure IVCashSumup(var record IVCashVc,Boolean);
 external procedure IVCashPasteRvrsVATCode(var record IVCashVc,Boolean);
 
+SetLangMode(LangRussian,"RUS",0);
+
 global
 function Boolean CanOpenIVCashPayment()
 begin
@@ -312,13 +314,15 @@ end;
 global 
 procedure OpenCCPayTouchScreenDClassWithVAT(Integer mwn,Integer rownr,LongInt sernr,val sum4,val change,val tot,string curncy,string paymode,string label,val vat)
 begin
-  Integer nwn;
+  Integer nwn,rwcnt,i;
   record RcVc RepSpec;
   record BaseCurBlock BCb;
   record IVCashVc IVCashr; //Edit***************************Sasha2,15:45 13.09.2016
-  Boolean testf;
+  row IVCashVc IVCashrw; //Edit***************************Sasha2,15:45 13.09.2016
+  Boolean testf,canpayterm;
   string 100 param; //Edit***************************Sasha2,12:46 14.09.2016
   longint amount;
+  record INVc INr;
   area areq,areply,cr;
   
   RepSpec.vals0 = -change;
@@ -357,26 +361,49 @@ begin
       RepSpec.AccStr = FirstInRange(paymode,20); //Edit***************************Sasha2,12:47 14.09.2016
       RepSpec.f6 = label;
       if (GetWindowFileName(mwn)=="IVCashVc" and UpperCase(param)!="SELF") then begin //Edit***************************Sasha2,15:44 13.09.2016 {
+        canpayterm = true;
+        
         IVCashr.SerNr = sernr;
         if (ReadFirstMain(IVCashr,1,true)) then begin
-          RepSpec.flags[0] = IVCashr.MakeFiscalReceiptF;
-          RepSpec.flags[0] = 1;
-          
-          setareazerosize(areq);
-          addtexttoarea(chr(13) & chr(10),cr);
-          amount = RepSpec.vals0 * 100;
-          addtexttoarea("{\"amount\":" & amount & "}",areq);
-          
-          writeareatofile(cr,"hansa.log",1);
-          writeareatofile(areq,"hansa.log",1);
-          writeareatofile(cr,"hansa.log",1);
-          
-          SendWebRequest("127.0.0.1",9020,-1,false,"POST","/api/pos/" & "9428d00b-34e7-401e-b58b-ecd249659435" & "/purchase/","application/json","",false,areq,areply,10);
-          
-          writeareatofile(cr,"hansa.log",1);
-          writeareatofile(areply,"hansa.log",1);
-          writeareatofile(cr,"hansa.log",1);
-          
+          if(currenttime<stringtotime("11:00") or currenttime>stringtotime("22:00"))then begin
+            rwcnt = matrowcnt(IVCashr);
+            for(i=0;i<rwcnt;i=i+1)begin
+              matrowget(IVCashr,i,IVCashrw);
+              INr.Code = IVCashrw.ArtCode;
+              if(readfirstmain(INr,1,true))then begin
+                switch(INr.Group)begin
+                  case "€‹ŠŽƒ":canpayterm = false;
+                  case "‚ˆŽ":canpayterm = false;
+                  case "‚Ž„Š€":canpayterm = false;
+                  case "ˆ‚Ž":canpayterm = false;
+                  case "‘‹€Ž":canpayterm = false;
+                  case "‚ˆ€":canpayterm = false;
+                end;
+              end;
+            end;
+          end;
+          if(canpayterm)then begin
+            RepSpec.flags[0] = IVCashr.MakeFiscalReceiptF;
+            RepSpec.flags[0] = 1;
+        
+            setareazerosize(areq);
+            addtexttoarea(chr(13) & chr(10),cr);
+            amount = RepSpec.vals0 * 100;
+            addtexttoarea("{\"amount\":" & amount & "}",areq);
+        
+            writeareatofile(cr,"hansa.log",1);
+            writeareatofile(areq,"hansa.log",1);
+            writeareatofile(cr,"hansa.log",1);
+        
+            SendWebRequest("127.0.0.1",9020,-1,false,"POST","/api/pos/" & "9428d00b-34e7-401e-b58b-ecd249659435" & "/purchase/","application/json","",false,areq,areply,10);
+        
+            writeareatofile(cr,"hansa.log",1);
+            writeareatofile(areply,"hansa.log",1);
+            writeareatofile(cr,"hansa.log",1);
+          end;
+        end else begin
+          CloseWindow(nwn);
+          messagebox(0,"„åßê´ òîâàðè çàáîðîíåíî ïðîäàâàòè äî 11 òà ï´ñëß 22 ïî òåðì´íàëó");
         end;
       end; //Edit***************************Sasha2,15:46 13.09.2016 }
       PutWindowRecord(nwn,RepSpec);

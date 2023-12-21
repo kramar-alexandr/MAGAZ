@@ -142,30 +142,55 @@ begin
 	record IVCashVc IVCashr;
 	integer wn;
 	boolean res,increasePrintCount;
+	record INVc INr;
+  row IVCashVc IVCashrw;
+  Integer rwcnt,i;
+  Boolean canpayterm;
 
   wn = CurWindow;
   if (GetWindowFileName(wn)=="IVCashVc") then begin
     GetWindowRecord(wn,IVCashr);
-    if (IVCashr.MakeFiscalReceiptF==1) then begin
-      res = MakeFiscalReceipt(IVCashr);  
-      increasePrintCount = res;
-    end else begin
-      res = true;
-      increasePrintCount = false;
+    canpayterm = true;
+    if(currenttime<stringtotime("11:00") or currenttime>stringtotime("22:00"))then begin
+      rwcnt = matrowcnt(IVCashr);
+      for(i=0;i<rwcnt;i=i+1)begin
+        matrowget(IVCashr,i,IVCashrw);
+        INr.Code = IVCashrw.ArtCode;
+        if(readfirstmain(INr,1,true))then begin
+          switch(INr.Group)begin
+            case "€‹ŠŽƒ":canpayterm = false;
+            case "‚ˆŽ":canpayterm = false;
+            case "‚Ž„Š€":canpayterm = false;
+            case "ˆ‚Ž":canpayterm = false;
+            case "‘‹€Ž":canpayterm = false;
+            case "‚ˆ€":canpayterm = false;
+          end;
+        end;
+      end;
     end;
     
-    if (res==false) then begin
-  		MessageBox(50004,"");
-  	end;
-    if (res and increasePrintCount) then begin
-      if (IVCashr.FiscalFlag < 1) then begin
-        IVCashr.FiscalFlag = 1;
+    if(canpayterm)then begin
+      if (IVCashr.MakeFiscalReceiptF==1) then begin
+        res = MakeFiscalReceipt(IVCashr);  
+        increasePrintCount = res;
+      end else begin
+        res = true;
+        increasePrintCount = false;
       end;
-      IVCashr.PrintFlagCounter = IVCashr.PrintFlagCounter + 1;
-      RECORDSTORE(IVCashr,true);
-      PutWindowRecord(wn,IVCashr);
-      windowdook(wn,0);
+    
+      if (res==false) then begin
+        MessageBox(50004,"");
+      end;
+      if (res and increasePrintCount) then begin
+        if (IVCashr.FiscalFlag < 1) then begin
+          IVCashr.FiscalFlag = 1;
+        end;
+        IVCashr.PrintFlagCounter = IVCashr.PrintFlagCounter + 1;
+        RECORDSTORE(IVCashr,true);
+        PutWindowRecord(wn,IVCashr);
+        windowdook(wn,0);
       
+      end;
     end;
   end;
   
@@ -179,23 +204,49 @@ begin
 	record RcVc RepSpec;
 	record IVCashVc IVCashr;
 	boolean res;
-	
+	record INVc INr;
+  row IVCashVc IVCashrw;
+  Integer rwcnt,i;
+  Boolean canpayterm;
+  
 	wn = curwindow;
 	DeselectWindow(wn,false);	
   GetWindowRecord(wn,RepSpec);
   
   IVCashr.SerNr = RepSpec.long1;
   if (ReadFirstMain(IVCashr,1,true)) then begin
-    res = MakeFiscalReceipt(IVCashr);
-    if (res==false) then begin
-      MessageBox(50004,"");		//Edit----------------------Dima  08.09.2015
-    end;			
-    if (res) then begin
-      if (IVCashr.FiscalFlag < 1) then begin
-        IVCashr.FiscalFlag = 1;
+    canpayterm = true;
+    if(currenttime<stringtotime("11:00") or currenttime>stringtotime("22:00"))then begin
+      rwcnt = matrowcnt(IVCashr);
+      for(i=0;i<rwcnt;i=i+1)begin
+        matrowget(IVCashr,i,IVCashrw);
+        INr.Code = IVCashrw.ArtCode;
+        if(readfirstmain(INr,1,true))then begin
+          switch(INr.Group)begin
+            case "€‹ŠŽƒ":canpayterm = false;
+            case "‚ˆŽ":canpayterm = false;
+            case "‚Ž„Š€":canpayterm = false;
+            case "ˆ‚Ž":canpayterm = false;
+            case "‘‹€Ž":canpayterm = false;
+            case "‚ˆ€":canpayterm = false;
+          end;
+        end;
       end;
-      IVCashr.PrintFlagCounter = IVCashr.PrintFlagCounter + 1;
-      RECORDSTORE(IVCashr,true);
+    end;
+    if(canpayterm)then begin
+      res = MakeFiscalReceipt(IVCashr);
+      if (res==false) then begin
+        MessageBox(50004,"");		//Edit----------------------Dima  08.09.2015
+      end;			
+      if (res) then begin
+        if (IVCashr.FiscalFlag < 1) then begin
+          IVCashr.FiscalFlag = 1;
+        end;
+        IVCashr.PrintFlagCounter = IVCashr.PrintFlagCounter + 1;
+        RECORDSTORE(IVCashr,true);
+      end;
+    end else begin
+      messagebox(0,"„åßê´ òîâàðè çàáîðîíåíî ïðîäàâàòè äî 11 òà ï´ñëß 22 ïî òåðì´íàëó");
     end;
   end;
 	
@@ -223,6 +274,10 @@ begin
   record IVCashVc IVCashr;
   record RcVc RepSpec;
   boolean res;
+  record INVc INr;
+  row IVCashVc IVCashrw;
+  Integer rwcnt,i;
+  Boolean canpayterm;
   
   wn = CurWindow;
   if(windowstate(wn)==Rs_normal)then begin
@@ -234,21 +289,44 @@ begin
 		if (GetWindowFileName(oldwn)=="IVCashVc") then begin
 			SelectWindow(oldwn);
 			GetWindowRecord(oldwn,IVCashr);
-		
-			res = MakeFiscalReceipt(IVCashr);  
-		
-			if (res==false) then begin
-				MessageBox(50004,"");
-			end;
-			if (res) then begin
-				if (IVCashr.FiscalFlag < 1) then begin
-					IVCashr.FiscalFlag = 1;
-				end;
-				IVCashr.PrintFlagCounter = IVCashr.PrintFlagCounter + 1;
-				RECORDSTORE(IVCashr,true);
-				PutWindowRecord(oldwn,IVCashr);
-				WindowDoOK(oldwn,0);
-			end;
+		  
+		  canpayterm = true;
+		  if(currenttime<stringtotime("11:00") or currenttime>stringtotime("22:00"))then begin
+        rwcnt = matrowcnt(IVCashr);
+        for(i=0;i<rwcnt;i=i+1)begin
+          matrowget(IVCashr,i,IVCashrw);
+          INr.Code = IVCashrw.ArtCode;
+          if(readfirstmain(INr,1,true))then begin
+            switch(INr.Group)begin
+              case "€‹ŠŽƒ":canpayterm = false;
+              case "‚ˆŽ":canpayterm = false;
+              case "‚Ž„Š€":canpayterm = false;
+              case "ˆ‚Ž":canpayterm = false;
+              case "‘‹€Ž":canpayterm = false;
+              case "‚ˆ€":canpayterm = false;
+            end;
+          end;
+        end;
+      end;
+      
+		  if(canpayterm)then begin
+        res = MakeFiscalReceipt(IVCashr);  
+    
+        if (res==false) then begin
+          MessageBox(50004,"");
+        end;
+        if (res) then begin
+          if (IVCashr.FiscalFlag < 1) then begin
+            IVCashr.FiscalFlag = 1;
+          end;
+          IVCashr.PrintFlagCounter = IVCashr.PrintFlagCounter + 1;
+          RECORDSTORE(IVCashr,true);
+          PutWindowRecord(oldwn,IVCashr);
+          WindowDoOK(oldwn,0);
+        end;
+      end else begin
+        messagebox(0,"„åßê´ òîâàðè çàáîðîíåíî ïðîäàâàòè äî 11 òà ï´ñëß 22 ïî òåðì´íàëó");
+      end;
 
 		end;
   end else begin
