@@ -195,7 +195,7 @@ begin
   
   
   compnr = stringtoint(webgetarg("comp"));
-  invnr = stringtolongint(webgetarg("comp"));
+  invnr = stringtolongint(webgetarg("invnr"));
   if(compnr>0 and invnr>0)then begin
     setcompany(compnr,false);
     IVCash_To_IV(invnr);
