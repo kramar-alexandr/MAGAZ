@@ -188,3 +188,19 @@ return;
 end;
 
 
+global webpublic updating procedure WebIVCash_To_IVMn()
+begin
+  integer compnr;
+  longint invnr;
+  
+  
+  compnr = stringtoint(webgetarg("comp"));
+  invnr = stringtolongint(webgetarg("comp"));
+  if(compnr>0 and invnr>0)then begin
+    setcompany(compnr,false);
+    IVCash_To_IV(invnr);
+  end;
+  
+return;
+end;
+
